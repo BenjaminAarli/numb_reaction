@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Data/scripts/resources/character.gd" type="Script" id=1]
+[ext_resource path="res://images/portraits/border_transparent.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+fname = "Luna Selene"
+display_name = "The moon"
+job_title = "Hierophant"
+description = "A gigantic rock in the sky; the bringer of tides and the long lost love of a man willing to destroy the thing him and his lost wife loved so dearly. "
+portrait = ExtResource( 2 )
+nameColor = Color( 0, 0, 0, 1 )

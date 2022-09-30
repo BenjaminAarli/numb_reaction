@@ -1,0 +1,15 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Data/scripts/resources/character.gd" type="Script" id=1]
+[ext_resource path="res://images/skills_cc/V2/Meche God of All Machines.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+fname = "Mecheous"
+display_name = "mind_Meche"
+job_title = "Hierophant"
+description = "Faith in the machine that they will never stop running to faith that the flesh won't decay and betray you. 
+
+In the end, faith is what stands between you and the thing that keeps all of this going. "
+portrait = ExtResource( 2 )
+nameColor = Color( 0, 0, 0, 1 )

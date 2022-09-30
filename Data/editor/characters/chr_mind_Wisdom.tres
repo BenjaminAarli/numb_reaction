@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Data/scripts/resources/character.gd" type="Script" id=1]
+[ext_resource path="res://images/portraits/border_transparent.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+fname = "Wisdomous"
+display_name = "mind_Wisdom"
+job_title = "Hierophant"
+description = "Years of learning combined with years of conversing has lead you to the knowledge you possess. Only problem being  it's been many years since you've needed them..."
+portrait = ExtResource( 2 )
+nameColor = Color( 0, 0, 0, 1 )

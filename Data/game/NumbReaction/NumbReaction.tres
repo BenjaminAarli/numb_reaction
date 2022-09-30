@@ -1,0 +1,17 @@
+[gd_resource type="Resource" load_steps=5 format=2]
+
+[ext_resource path="res://Data/scripts/resources/story.gd" type="Script" id=1]
+[ext_resource path="res://Data/editor/characters/chr_Gilea.tres" type="Resource" id=2]
+[ext_resource path="res://Data/editor/characters/chr_Harry.tres" type="Resource" id=3]
+[ext_resource path="res://Data/editor/characters/chr_Mushee.tres" type="Resource" id=4]
+
+[resource]
+script = ExtResource( 1 )
+characters = {
+"Gilea": ExtResource( 2 ),
+"Harry": ExtResource( 3 ),
+"Mushee": ExtResource( 4 )
+}
+paths = {
+"intro": [  ]
+}

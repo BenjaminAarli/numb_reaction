@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Data/scripts/resources/character.gd" type="Script" id=1]
+[ext_resource path="res://images/portraits/Beautiful Young Woman.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+fname = "Gileath "
+display_name = "Gilea"
+job_title = "Hierophant"
+description = "Young-Adult with a substance abuse problem. Her smile is warm and her giggles are annoyingly cute, yet the problems of her abuse and her mind has  yet to devulge from her fun little escape of reality. "
+portrait = ExtResource( 2 )
+nameColor = Color( 0, 0, 0, 1 )

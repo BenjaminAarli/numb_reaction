@@ -1,0 +1,48 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Data/scripts/resources/story_path.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+display_name = "Dungeon"
+story = [ {
+"speaker": "",
+"text": "The smell starts to leak out. The stench of rot and decay fills the room as the wealded gate is dropped on the ground.",
+"type": "cog_type_text"
+}, {
+"speaker": "Horror",
+"text": "This was sealed for a reason. This is my expertise. Let me guide you.",
+"type": "cog_type_text"
+}, {
+"speaker": "",
+"text": "The people around you stare at the abyss inside the gate.
+It's empty and dark; filled with echos of the past. 
+The concrete floor you are standing on stops at it's enterence; 
+instead being replaced with tiles. ",
+"type": "cog_type_text"
+}, {
+"speaker": "Gunnar",
+"text": "\"All right; meatsacks! You know the drill. Let's clear this
+out and see if there is anything useful down there, but 
+first...\"",
+"type": "cog_type_text"
+}, {
+"speaker": "",
+"text": "He looks at you with a faint grin. You know you are first
+to enter, being the hirophant - and the worthless piece
+of shit that you are. ",
+"type": "cog_type_text"
+}, {
+"speaker": "",
+"text": "You enter the abyss; it's cold embrace catches you
+immedietly. This isn't like other parts of the factory. 
+This is abandoned; long, long ago. Before us... 
+Possibly before our fathers and mothers even. ",
+"type": "cog_type_text"
+}, {
+"speaker": "Meche",
+"text": "This is old but still built using the guidelines of current
+standards - it is not as old as it looks but it is old. No 
+doubts about that. 100 years maximum.",
+"type": "cog_type_text"
+} ]

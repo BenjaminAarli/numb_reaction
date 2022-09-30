@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Cogs/cogBlank.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Cogs/cogTree.gd" type="Script" id=2]
+
+[node name="cogTree" instance=ExtResource( 1 )]
+anchor_bottom = 0.037
+margin_bottom = 0.0400009
+script = ExtResource( 2 )
+
+[node name="Cross" parent="Movable/Base" index="1"]
+anchor_top = 0.138
+anchor_bottom = 0.138
+margin_top = -4.76837e-07
+margin_bottom = 24.0
+
+[node name="TextureRect" parent="Movable/Base" index="2"]
+margin_right = 56.0
+margin_bottom = 32.0
+
+[node name="Type" parent="Movable/Base" index="3"]
+margin_bottom = 40.0
+text = "TREE"
+
+[node name="text" type="LineEdit" parent="Movable/Addons" index="0"]
+anchor_left = 0.113
+anchor_right = 0.93
+anchor_bottom = 1.0
+margin_left = -0.184006
+margin_top = 8.0
+margin_right = -0.240051
+margin_bottom = -8.0

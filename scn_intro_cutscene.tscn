@@ -1,0 +1,678 @@
+[gd_scene load_steps=37 format=2]
+
+[ext_resource path="res://audio/bg_sound/Rain Sound Effect Loop - Gravity Sound.wav" type="AudioStream" id=1]
+[ext_resource path="res://images/textures/oilspill.jpg" type="Texture" id=2]
+[ext_resource path="res://shaders/wobble.gdshader" type="Shader" id=3]
+[ext_resource path="res://fonts/atwriter.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://GameSystem/scripts/GameSystem.gd" type="Script" id=5]
+[ext_resource path="res://fonts/GameText.tres" type="DynamicFont" id=6]
+[ext_resource path="res://images/dirty colors2.png" type="Texture" id=7]
+[ext_resource path="res://images/skills_cc/V2/Horror.png" type="Texture" id=8]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node2D
+
+func _ready():
+	$Rain.play(0.0)
+	pass
+"
+
+[sub_resource type="Shader" id=14]
+code = "/* 
+Earthbound battle backgrounds shader with scrolling effect and palette cycling like in the original game.
+@retr0_dev
+	
+Apply the shader to a TextureRect or a Sprite. Use a texture with some shapes in a transparent background for best results.
+You can then use a ColorRect or another method to paint the background.
+You can use the shader on multiple TextureRects and obtain a double-buffer effect tweaking the values for each one, remember to Make Unique the shader material.
+*/
+shader_type canvas_item;
+
+uniform float screen_height = 1920.0;
+uniform float amplitude = 0.005;
+uniform float frequency = 5.0;
+uniform float speed = 0.05;
+uniform float amplitude_vertical = 0.004;
+uniform float frequency_vertical = 20.0;
+uniform float speed_vertical = 0.05;
+uniform vec2 scroll_direction = vec2(0.0, 0.0);
+uniform float scrolling_speed = 0.04;
+uniform bool enable_palette_cycling = false;
+uniform sampler2D palette;
+uniform float palette_speed = 0.001;
+
+void fragment()
+{
+	float diff_x = amplitude * sin((frequency * UV.y) + (speed * TIME));
+	float diff_y = amplitude_vertical * sin((frequency_vertical * UV.y)  + (speed_vertical * TIME));
+	vec2 scroll = scroll_direction * TIME * scrolling_speed;
+	vec4 tex = texture(TEXTURE, vec2(UV.x + diff_x, UV.y + diff_y) + scroll);
+	float palette_swap = mod(tex.r - TIME * palette_speed, 1.0);
+	
+	if (enable_palette_cycling)
+	{
+		COLOR = vec4(texture(palette, vec2(palette_swap, 0)).rgb, tex.a);
+	}
+	else 
+	COLOR = tex
+	;
+//	COLOR = mix(vec4(0.0), COLOR, float(int(UV.y * screen_height) % 2));
+}"
+
+[sub_resource type="ShaderMaterial" id=15]
+shader = SubResource( 14 )
+shader_param/screen_height = 1920.0
+shader_param/amplitude = 0.1
+shader_param/frequency = 12.7
+shader_param/speed = 0.0
+shader_param/amplitude_vertical = 0.004
+shader_param/frequency_vertical = 11.6
+shader_param/speed_vertical = 0.0
+shader_param/scroll_direction = Vector2( 0.1, 0.2 )
+shader_param/scrolling_speed = 0.04
+shader_param/enable_palette_cycling = false
+shader_param/palette_speed = 0.001
+
+[sub_resource type="Shader" id=7]
+code = "shader_type canvas_item;
+
+// Amount of detail.
+uniform int octaves = 4;
+
+// Opacity of the output fog.
+uniform float starting_amplitude: hint_range(0.0, 0.5) = 0.5;
+
+// Rate of pattern within the fog.
+uniform float starting_frequency = 1.0;
+
+// Shift towards transparency (clamped) for sparser fog.
+uniform float shift: hint_range(-1.0, 0.0) = -0.2;
+
+// Direction and speed of travel.
+uniform vec2 velocity = vec2(1.0, 1.0);
+
+// Color of the fog.
+uniform vec4 fog_color: hint_color = vec4(0.0, 0.0, 0.0, 1.0);
+
+// Noise texture; OpenSimplexNoise is great, but any filtered texture is fine.
+uniform sampler2D noise;
+
+float rand(vec2 uv) {
+	float amplitude = starting_amplitude;
+	float frequency = starting_frequency;
+	float output = 0.0;
+	for (int i = 0; i < octaves; i++) {
+		output += texture(noise, uv * frequency).x * amplitude;
+		amplitude /= 2.0;
+		frequency *= 2.0;
+	}
+	return clamp(output + shift, 0.0, 1.0);
+}
+
+void fragment() {
+	vec2 motion = vec2(rand(UV + TIME * starting_frequency * velocity));
+	COLOR = mix(vec4(0.0), fog_color, rand(UV + motion));
+}"
+
+[sub_resource type="OpenSimplexNoise" id=5]
+
+[sub_resource type="NoiseTexture" id=6]
+width = 500
+height = 1080
+seamless = true
+noise = SubResource( 5 )
+
+[sub_resource type="ShaderMaterial" id=8]
+shader = SubResource( 7 )
+shader_param/octaves = 4
+shader_param/starting_amplitude = 0.5
+shader_param/starting_frequency = 1.0
+shader_param/shift = -0.2
+shader_param/velocity = Vector2( 0, 0.005 )
+shader_param/fog_color = Color( 0, 0, 0, 0 )
+shader_param/noise = SubResource( 6 )
+
+[sub_resource type="Shader" id=3]
+code = "shader_type canvas_item;
+
+// Amount of detail.
+uniform int octaves = 4;
+
+// Opacity of the output fog.
+uniform float starting_amplitude: hint_range(0.0, 0.5) = 0.5;
+
+// Rate of pattern within the fog.
+uniform float starting_frequency = 1.0;
+
+// Shift towards transparency (clamped) for sparser fog.
+uniform float shift: hint_range(-1.0, 0.0) = -0.2;
+
+// Direction and speed of travel.
+uniform vec2 velocity = vec2(1.0, 1.0);
+
+// Color of the fog.
+uniform vec4 fog_color: hint_color = vec4(0.0, 0.0, 0.0, 1.0);
+
+// Noise texture; OpenSimplexNoise is great, but any filtered texture is fine.
+uniform sampler2D noise;
+
+float rand(vec2 uv) {
+	float amplitude = starting_amplitude;
+	float frequency = starting_frequency;
+	float output = 0.0;
+	for (int i = 0; i < octaves; i++) {
+		output += texture(noise, uv * frequency).x * amplitude;
+		amplitude /= 2.0;
+		frequency *= 2.0;
+	}
+	return clamp(output + shift, 0.0, 1.0);
+}
+
+void fragment() {
+	vec2 motion = vec2(rand(UV + TIME * starting_frequency * velocity));
+	COLOR = mix(vec4(0.0), fog_color, rand(UV + motion));
+}"
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 3 )
+shader_param/octaves = 4
+shader_param/starting_amplitude = 0.5
+shader_param/starting_frequency = 1.0
+shader_param/shift = -0.2
+shader_param/velocity = Vector2( 0, 0.005 )
+shader_param/fog_color = Color( 1, 1, 1, 1 )
+shader_param/noise = SubResource( 6 )
+
+[sub_resource type="Shader" id=12]
+code = "shader_type canvas_item;
+
+uniform sampler2D backgroundTexture;
+
+// Maximum number of cells a ripple can cross.
+uniform float MAX_RADIUS = 2.0;
+
+// Hash functions shamefully stolen from:
+// https://www.shadertoy.com/view/4djSRW
+uniform float HASHSCALE1 = 0.1031;
+uniform vec3 HASHSCALE3 = vec3(0.1031, 0.1030, 0.0973);
+
+float hash12(vec2 p)
+{
+	vec3 p3  = fract(vec3(p.xyx) * HASHSCALE1);
+	p3 += dot(p3, p3.yzx + 19.19);
+	return fract((p3.x + p3.y) * p3.z);
+}
+
+vec2 hash22(vec2 p)
+{
+	vec3 p3 = fract(vec3(p.xyx) * HASHSCALE3);
+	p3 += dot(p3, p3.yzx+19.19);
+	return fract((p3.xx+p3.yz)*p3.zy);
+}
+
+void fragment()
+{
+	float resolution = (10.0 * exp2(-3.0 / (1.0 / TEXTURE_PIXEL_SIZE).x)) * 5.0;
+	vec2 uv = (UV.xy / (1.0 / TEXTURE_PIXEL_SIZE).y * resolution) * 1.0;
+	vec2 p0 = floor(uv);
+
+	vec2 circles = vec2(0.0);
+	for (float j = -MAX_RADIUS; j <= MAX_RADIUS; ++j)
+	{
+		for (float i = -MAX_RADIUS; i <= MAX_RADIUS; ++i)
+		{
+			vec2 pi = p0 + vec2(i, j);
+			
+			vec2 hsh = hash22(pi);
+			
+			vec2 p = pi + hash22(hsh);
+			
+			float t = fract(0.3 * TIME + hash12(hsh));
+			vec2 v = p - uv;
+			float d = length(v) - (float(MAX_RADIUS) + 1.)*t;
+			
+			float h = 1e-3;
+			float d1 = d - h;
+			float d2 = d + h;
+			float p1 = sin(31.*d1) * smoothstep(-0.6, -0.3, d1) * smoothstep(0., -0.3, d1);
+			float p2 = sin(31.*d2) * smoothstep(-0.6, -0.3, d2) * smoothstep(0., -0.3, d2);
+			circles += 0.2 * normalize(v) * ((p2 - p1) / (2. * h) * (1. - t) * (1. - t));
+		}
+	}
+	
+	circles /= float((MAX_RADIUS * 2.0 + 1.0) * (MAX_RADIUS * 2.0 + 1.0)) / 0.4;
+	
+	float intensity = mix(0.01, 0.15, smoothstep(0.1, 0.6, abs(fract(0.05 * TIME + 0.5) * 2.0 -1.0)));
+	vec3 n = vec3(circles, sqrt(1.0 - dot(circles, circles)));
+	vec3 color = texture(backgroundTexture, uv/resolution - intensity * n.xy).rgb + 5.0 * pow(clamp(dot(n, normalize(vec3(1.0, 0.7, 0.5))), 0.0, 1.0), 6.0);
+	COLOR = vec4(color, 1.0);
+}"
+
+[sub_resource type="OpenSimplexNoise" id=16]
+period = 3.0
+
+[sub_resource type="NoiseTexture" id=17]
+flags = 3
+width = 1920
+height = 1080
+seamless = true
+noise = SubResource( 16 )
+
+[sub_resource type="ShaderMaterial" id=13]
+shader = SubResource( 12 )
+shader_param/MAX_RADIUS = 3.0
+shader_param/HASHSCALE1 = 0.1031
+shader_param/HASHSCALE3 = Vector3( 0.1031, 0.103, 0.0973 )
+shader_param/backgroundTexture = SubResource( 17 )
+
+[sub_resource type="Shader" id=18]
+code = "shader_type canvas_item;
+
+// Amount of detail.
+uniform int octaves = 4;
+
+// Opacity of the output fog.
+uniform float starting_amplitude: hint_range(0.0, 0.5) = 0.5;
+
+// Rate of pattern within the fog.
+uniform float starting_frequency = 1.0;
+
+// Shift towards transparency (clamped) for sparser fog.
+uniform float shift: hint_range(-1.0, 0.0) = -0.2;
+
+// Direction and speed of travel.
+uniform vec2 velocity = vec2(1.0, 1.0);
+
+// Color of the fog.
+uniform vec4 fog_color: hint_color = vec4(0.0, 0.0, 0.0, 1.0);
+
+// Noise texture; OpenSimplexNoise is great, but any filtered texture is fine.
+uniform sampler2D noise;
+
+float rand(vec2 uv) {
+	float amplitude = starting_amplitude;
+	float frequency = starting_frequency;
+	float output = 0.0;
+	for (int i = 0; i < octaves; i++) {
+		output += texture(noise, uv * frequency).x * amplitude;
+		amplitude /= 2.0;
+		frequency *= 2.0;
+	}
+	return clamp(output + shift, 0.0, 1.0);
+}
+
+void fragment() {
+	vec2 motion = vec2(rand(UV + TIME * starting_frequency * velocity));
+	COLOR = mix(vec4(0.0), fog_color, rand(UV + motion));
+}"
+
+[sub_resource type="OpenSimplexNoise" id=19]
+
+[sub_resource type="NoiseTexture" id=20]
+width = 500
+height = 1080
+seamless = true
+noise = SubResource( 19 )
+
+[sub_resource type="ShaderMaterial" id=21]
+shader = SubResource( 18 )
+shader_param/octaves = 4
+shader_param/starting_amplitude = 0.5
+shader_param/starting_frequency = 1.0
+shader_param/shift = -0.2
+shader_param/velocity = Vector2( 0, 0.005 )
+shader_param/fog_color = Color( 0, 0, 0, 1 )
+shader_param/noise = SubResource( 20 )
+
+[sub_resource type="Shader" id=22]
+code = "shader_type canvas_item;
+
+// Amount of detail.
+uniform int octaves = 4;
+
+// Opacity of the output fog.
+uniform float starting_amplitude: hint_range(0.0, 0.5) = 0.5;
+
+// Rate of pattern within the fog.
+uniform float starting_frequency = 1.0;
+
+// Shift towards transparency (clamped) for sparser fog.
+uniform float shift: hint_range(-1.0, 0.0) = -0.2;
+
+// Direction and speed of travel.
+uniform vec2 velocity = vec2(1.0, 1.0);
+
+// Color of the fog.
+uniform vec4 fog_color: hint_color = vec4(0.0, 0.0, 0.0, 1.0);
+
+// Noise texture; OpenSimplexNoise is great, but any filtered texture is fine.
+uniform sampler2D noise;
+
+float rand(vec2 uv) {
+	float amplitude = starting_amplitude;
+	float frequency = starting_frequency;
+	float output = 0.0;
+	for (int i = 0; i < octaves; i++) {
+		output += texture(noise, uv * frequency).x * amplitude;
+		amplitude /= 2.0;
+		frequency *= 2.0;
+	}
+	return clamp(output + shift, 0.0, 1.0);
+}
+
+void fragment() {
+	vec2 motion = vec2(rand(UV + TIME * starting_frequency * velocity));
+	COLOR = mix(vec4(0.0), fog_color, rand(UV + motion));
+}"
+
+[sub_resource type="ShaderMaterial" id=23]
+shader = SubResource( 22 )
+shader_param/octaves = 4
+shader_param/starting_amplitude = 0.5
+shader_param/starting_frequency = 1.0
+shader_param/shift = -0.2
+shader_param/velocity = Vector2( 0, 0.005 )
+shader_param/fog_color = Color( 0.141176, 0.141176, 0.141176, 1 )
+shader_param/noise = SubResource( 20 )
+
+[sub_resource type="StyleBoxFlat" id=24]
+bg_color = Color( 0.192157, 0, 0, 1 )
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+expand_margin_left = 2.0
+expand_margin_right = 1.0
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id=25]
+bg_color = Color( 0.215686, 0.215686, 0.215686, 1 )
+
+[sub_resource type="Theme" id=26]
+default_font = ExtResource( 6 )
+VScrollBar/icons/decrement = null
+VScrollBar/icons/decrement_highlight = null
+VScrollBar/icons/decrement_pressed = null
+VScrollBar/icons/increment = null
+VScrollBar/icons/increment_highlight = null
+VScrollBar/icons/increment_pressed = null
+VScrollBar/styles/grabber = SubResource( 24 )
+VScrollBar/styles/grabber_highlight = SubResource( 24 )
+VScrollBar/styles/grabber_pressed = SubResource( 24 )
+VScrollBar/styles/scroll = SubResource( 25 )
+VScrollBar/styles/scroll_focus = SubResource( 24 )
+
+[sub_resource type="ShaderMaterial" id=27]
+shader = ExtResource( 3 )
+shader_param/screen_height = 1920.0
+shader_param/amplitude = 0.005
+shader_param/frequency = 5.0
+shader_param/speed = 0.05
+shader_param/amplitude_vertical = 0.004
+shader_param/frequency_vertical = 20.0
+shader_param/speed_vertical = 0.05
+shader_param/scroll_direction = Vector2( 0, 0 )
+shader_param/scrolling_speed = 0.04
+shader_param/enable_palette_cycling = false
+shader_param/palette_speed = 0.1
+
+[sub_resource type="DynamicFont" id=28]
+size = 28
+font_data = ExtResource( 4 )
+
+[sub_resource type="Theme" id=29]
+default_font = SubResource( 28 )
+
+[sub_resource type="Animation" id=11]
+resource_name = "fade_to_black"
+
+[sub_resource type="Animation" id=10]
+resource_name = "fade_to_image"
+
+[sub_resource type="Animation" id=30]
+resource_name = "startup"
+length = 3.0
+tracks/0/type = "bezier"
+tracks/0/path = NodePath("TextDisplay:modulate:r")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray(  ),
+"times": PoolRealArray(  )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath("TextDisplay:modulate:g")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray(  ),
+"times": PoolRealArray(  )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath("TextDisplay:modulate:b")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray(  ),
+"times": PoolRealArray(  )
+}
+tracks/3/type = "bezier"
+tracks/3/path = NodePath("TextDisplay:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.8, 2.5 )
+}
+
+[node name="scn_intro_cutscene" type="Node2D"]
+script = SubResource( 1 )
+
+[node name="Rain" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 1 )
+volume_db = -20.0
+
+[node name="TextDisplay" type="Control" parent="."]
+margin_left = 1128.0
+margin_top = 24.0
+margin_right = 1752.0
+margin_bottom = 1056.0
+mouse_filter = 2
+
+[node name="ColorRect2" type="ColorRect" parent="TextDisplay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -1128.0
+margin_top = -24.0
+margin_right = 168.0
+margin_bottom = 24.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="TextureRect" type="TextureRect" parent="TextDisplay/ColorRect2"]
+self_modulate = Color( 1, 1, 1, 0.0823529 )
+material = SubResource( 15 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 2 )
+stretch_mode = 2
+
+[node name="ColorRect3" type="ColorRect" parent="TextDisplay/ColorRect2"]
+show_behind_parent = true
+material = SubResource( 8 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -8.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="OIL_Front" type="ColorRect" parent="TextDisplay/ColorRect2"]
+material = SubResource( 4 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="RAIN" type="ColorRect" parent="TextDisplay/ColorRect2"]
+self_modulate = Color( 0.105882, 0.105882, 0.105882, 0.768627 )
+material = SubResource( 13 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = 7680.0
+margin_bottom = 4320.0
+rect_scale = Vector2( 0.2, 0.2 )
+color = Color( 0, 0, 0, 1 )
+
+[node name="GameEngine" type="Node2D" parent="."]
+z_index = 2
+script = ExtResource( 5 )
+
+[node name="TextDisplay" type="Control" parent="GameEngine"]
+modulate = Color( 1, 1, 1, 0 )
+margin_left = 1128.0
+margin_top = 24.0
+margin_right = 1752.0
+margin_bottom = 1056.0
+mouse_filter = 2
+
+[node name="ColorRect2" type="ColorRect" parent="GameEngine/TextDisplay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 88.0
+margin_top = -24.0
+margin_right = -88.0
+margin_bottom = 24.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="ColorRect3" type="ColorRect" parent="GameEngine/TextDisplay/ColorRect2"]
+show_behind_parent = true
+material = SubResource( 21 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -8.0
+margin_right = 8.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="ColorRect" type="ColorRect" parent="GameEngine/TextDisplay"]
+material = SubResource( 23 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 88.0
+margin_top = -24.0
+margin_right = -88.0
+margin_bottom = 24.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="ColorRect" type="ColorRect" parent="GameEngine/TextDisplay/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 16.0
+margin_top = 24.0
+margin_right = -16.0
+margin_bottom = -24.0
+color = Color( 0.0431373, 0.0431373, 0.0431373, 0.219608 )
+
+[node name="SpeakerNode" type="Control" parent="GameEngine/TextDisplay"]
+margin_left = -80.0
+margin_top = 344.0
+margin_right = 80.0
+margin_bottom = 552.0
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="Panel" type="Panel" parent="GameEngine/TextDisplay/SpeakerNode"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Speaker" type="TextureRect" parent="GameEngine/TextDisplay/SpeakerNode"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = -8.0
+texture = ExtResource( 8 )
+expand = true
+stretch_mode = 1
+
+[node name="RichTextLabel" type="RichTextLabel" parent="GameEngine/TextDisplay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 120.0
+margin_top = 24.0
+margin_right = -104.0
+margin_bottom = -392.0
+rect_clip_content = false
+theme = SubResource( 26 )
+bbcode_enabled = true
+visible_characters = 0
+percent_visible = 0.0
+meta_underlined = false
+scroll_following = true
+
+[node name="Button" type="TextureButton" parent="GameEngine/TextDisplay"]
+self_modulate = Color( 0.278431, 0.219608, 0.219608, 1 )
+material = SubResource( 27 )
+margin_left = 112.0
+margin_top = 664.0
+margin_right = 512.0
+margin_bottom = 728.0
+texture_normal = ExtResource( 7 )
+expand = true
+stretch_mode = 1
+
+[node name="Label" type="Label" parent="GameEngine/TextDisplay/Button"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -133.0
+margin_bottom = -19.0
+rect_scale = Vector2( 1.5, 1.5 )
+text = "CONTINUE"
+align = 1
+valign = 1
+
+[node name="Clock" type="Control" parent="GameEngine/TextDisplay"]
+margin_left = -96.0
+margin_right = 24.0
+margin_bottom = 56.0
+theme = SubResource( 29 )
+
+[node name="Panel" type="Panel" parent="GameEngine/TextDisplay/Clock"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel2" type="Panel" parent="GameEngine/TextDisplay/Clock/Panel"]
+self_modulate = Color( 0.580392, 0.580392, 0.580392, 1 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 2.0
+margin_top = 3.0
+margin_right = -2.0
+margin_bottom = -3.0
+
+[node name="Label" type="Label" parent="GameEngine/TextDisplay/Clock"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "00:22"
+align = 1
+valign = 1
+
+[node name="btn_ClockActivator" type="Button" parent="GameEngine/TextDisplay"]
+margin_left = -96.0
+margin_right = 25.0
+margin_bottom = 55.0
+focus_mode = 0
+enabled_focus_mode = 0
+flat = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="GameEngine"]
+anims/fade_to_black = SubResource( 11 )
+anims/fade_to_image = SubResource( 10 )
+anims/startup = SubResource( 30 )

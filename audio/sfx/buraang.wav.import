@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/buraang.wav-c78ad1291cc005e3c4f58f9fd69768ae.sample"
+
+[deps]
+
+source_file="res://audio/sfx/buraang.wav"
+dest_files=[ "res://.import/buraang.wav-c78ad1291cc005e3c4f58f9fd69768ae.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

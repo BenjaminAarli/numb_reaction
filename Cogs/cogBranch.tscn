@@ -1,0 +1,68 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Cogs/cogBlank.tscn" type="PackedScene" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends \"res://Cogs/cogBlank.gd\"
+
+var text = null
+var goto_tree = false
+var conditions = []
+
+func _ready():
+	type = Data.COG_TYPE_BRANCH
+	pass
+
+func get_data():
+	var gettext = str($Movable/Addons/text.text)
+	var goto_tree = bool($Movable/Addons/goto_tree.pressed)
+	
+	var data = {}
+	data[\"type\"] 	= str(type)
+	data[\"text\"] 	= gettext if gettext.length() > 0 else \"\"
+	data[\"goto_tree\"] = goto_tree
+	data[\"conditions\"] = []
+	return data
+
+func set_data(data):
+	$Movable/Addons/text.text = data[\"text\"]
+	if data.has(\"goto_tree\"):
+		$Movable/Addons/goto_tree.pressed = data[\"goto_tree\"]
+	# Later add conditions 
+	pass
+"
+
+[node name="cogBranch" instance=ExtResource( 1 )]
+margin_bottom = 40.0
+script = SubResource( 1 )
+
+[node name="Cross" parent="Movable/Base" index="1"]
+anchor_top = 0.2
+anchor_bottom = 0.2
+margin_top = 0.0
+margin_bottom = 24.0
+
+[node name="Type" parent="Movable/Base" index="3"]
+margin_right = 80.0
+margin_bottom = 40.0
+text = "BRANCH"
+
+[node name="Addons" parent="Movable" index="1"]
+rect_min_size = Vector2( 0, 40 )
+
+[node name="text" type="LineEdit" parent="Movable/Addons" index="0"]
+anchor_left = 0.141
+anchor_right = 0.93
+anchor_bottom = 1.0
+margin_left = -0.0880051
+margin_top = 8.0
+margin_right = -88.24
+margin_bottom = -8.0
+placeholder_text = "I Pick My Nose..."
+
+[node name="goto_tree" type="CheckBox" parent="Movable/Addons" index="1"]
+margin_left = 440.0
+margin_top = 8.0
+margin_right = 536.0
+margin_bottom = 32.0
+text = "Go Tree"

@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/keyitem.wav-32eb688dabf874500fe72c7f544da87b.sample"
+
+[deps]
+
+source_file="res://audio/sfx/keyitem.wav"
+dest_files=[ "res://.import/keyitem.wav-32eb688dabf874500fe72c7f544da87b.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

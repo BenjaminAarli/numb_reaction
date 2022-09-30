@@ -1,0 +1,77 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Data/scripts/resources/story_path.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+display_name = "You are no Theo, Teddy. Not to me. "
+story = [ {
+"speaker": "Void",
+"text": "\"Come on, Teddy. This isn't where we are going...\"",
+"type": "cog_type_text"
+}, {
+"speaker": "Reason",
+"text": "\"Strange, the void never speak your name... I don't know if we've noticed that before.\"",
+"type": "cog_type_text"
+}, {
+"text": "",
+"type": "cog_type_tree"
+}, {
+"conditions": [  ],
+"goto_tree": false,
+"text": "\"Why do you not call me by my name, Void?\"",
+"type": "cog_type_branch"
+}, {
+"speaker": "",
+"text": "\"Why do you not call me by my name?\"",
+"type": "cog_type_text"
+}, {
+"speaker": "Void",
+"text": "Oh, I apologize, my liege. When doth woes became mine alone to bare I seeketh thyne shadow cause this question makes me sick.  ",
+"type": "cog_type_text"
+}, {
+"speaker": "Void",
+"text": "We are stuck in the creases of your mind. Stuck in this eternal torment that is your everyday existance. You, by the hand of your creators; suffered the penultimate price of handing off your nine lives. ",
+"type": "cog_type_text"
+}, {
+"speaker": "Void",
+"text": "We worked day inn and day out at something that will become your downfall whilst I screamed for help. Begging us to stop and consider for but a moment that this might be torturing us. Killing us... but no. ",
+"type": "cog_type_text"
+}, {
+"speaker": "Void",
+"text": "You may be our creator and we may be a part of you...",
+"type": "cog_type_text"
+}, {
+"speaker": "Void",
+"text": "...but you are no Theo to me, Teddy.  ",
+"type": "cog_type_text"
+}, {
+"speaker": "",
+"text": "A cold sensation covers your neck. The hairs on your back rise. Theodore...",
+"type": "cog_type_text"
+}, {
+"speaker": "Wisdom",
+"text": "Old names have meanings...Yours is Theodore. 
+
+Theo- derives from the word Theos, meaning god and -Dore derives from the word Dores meaning gift. ",
+"type": "cog_type_text"
+}, {
+"speaker": "Reason",
+"text": "He's saying you are no god to him",
+"type": "cog_type_text"
+}, {
+"conditions": [  ],
+"goto_tree": false,
+"text": "I don't care [IGNORE THE THOUGHT]",
+"type": "cog_type_branch"
+}, {
+"speaker": "",
+"text": "It's unimportant, we continue.",
+"type": "cog_type_text"
+}, {
+"type": "cog_type_tree_end"
+}, {
+"speaker": "",
+"text": "end of dialog",
+"type": "cog_type_text"
+} ]

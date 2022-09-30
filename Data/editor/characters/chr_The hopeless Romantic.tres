@@ -1,0 +1,15 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Data/scripts/resources/character.gd" type="Script" id=1]
+[ext_resource path="res://images/portraits/border_transparent.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+fname = "Gene "
+display_name = "The hopeless Romantic"
+job_title = "Hierophant"
+description = "He's a young man with love on his mind. The person he's inlove with does not return the affection but this won't stop him. He will do whatever he must to make her fall for him and in the end. 
+
+The problem is that; while he is a suave and not unatractive, she feels nothing for him - leaving him in the dirt but she's friendly and will play along... until it gets to much. "
+portrait = ExtResource( 2 )
+nameColor = Color( 0, 0, 0, 1 )

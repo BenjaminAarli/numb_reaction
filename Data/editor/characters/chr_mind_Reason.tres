@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Data/scripts/resources/character.gd" type="Script" id=1]
+[ext_resource path="res://images/portraits/border_transparent.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+fname = "Reasonous"
+display_name = "mind_Reason"
+job_title = "Hierophant"
+description = "Simplicity. Complexity. It's all numbers, man. "
+portrait = ExtResource( 2 )
+nameColor = Color( 0, 0, 0, 1 )

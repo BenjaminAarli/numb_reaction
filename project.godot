@@ -1,0 +1,114 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[ {
+"base": "",
+"class": "GitAPI",
+"language": "NativeScript",
+"path": "res://addons/godot-git-plugin/git_api.gdns"
+}, {
+"base": "Resource",
+"class": "numb_character",
+"language": "GDScript",
+"path": "res://Data/scripts/resources/character.gd"
+}, {
+"base": "Resource",
+"class": "numb_path",
+"language": "GDScript",
+"path": "res://Data/scripts/resources/story_path.gd"
+}, {
+"base": "Resource",
+"class": "numb_story",
+"language": "GDScript",
+"path": "res://Data/scripts/resources/story.gd"
+}, {
+"base": "RichTextEffect",
+"class": "speak",
+"language": "GDScript",
+"path": "res://SpeakerFont.gd"
+} ]
+_global_script_class_icons={
+"GitAPI": "",
+"numb_character": "",
+"numb_path": "",
+"numb_story": "",
+"speak": ""
+}
+
+[application]
+
+config/name="(DialogueGame) Numb Reaction"
+config/description="A game that hates what it is. A visual novel."
+run/main_scene="res://scn_intro.tscn"
+boot_splash/image="res://images/clipboard1.png"
+config/icon="res://icon.png"
+
+[autoload]
+
+Data="*res://data.gd"
+
+[display]
+
+window/size/width=1920
+window/size/height=1080
+window/size/resizable=false
+window/size/fullscreen=true
+window/size/test_width=1600
+window/size/test_height=900
+window/per_pixel_transparency/allowed=true
+window/stretch/mode="viewport"
+
+[editor]
+
+version_control_autoload_on_startup=true
+version_control_plugin_name="GitAPI"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/CogChaosPlugin/plugin.cfg", "res://addons/SimpleTODO/plugin.cfg" )
+
+[gdnative]
+
+singletons=[ "res://addons/godot-git-plugin/git_api.gdnlib" ]
+
+[importer_defaults]
+
+texture={
+"compress/bptc_ldr": 0,
+"compress/hdr_mode": 0,
+"compress/lossy_quality": 0.7,
+"compress/mode": 0,
+"compress/normal_map": 0,
+"detect_3d": false,
+"flags/anisotropic": false,
+"flags/filter": false,
+"flags/mipmaps": false,
+"flags/repeat": 0,
+"flags/srgb": 2,
+"process/HDR_as_SRGB": false,
+"process/fix_alpha_border": true,
+"process/invert_color": false,
+"process/normal_map_invert_y": false,
+"process/premult_alpha": false,
+"size_limit": 0,
+"stream": false,
+"svg/scale": 1.0
+}
+
+[physics]
+
+common/enable_pause_aware_picking=true
+
+[rendering]
+
+quality/driver/driver_name="GLES2"
+vram_compression/import_etc=true
+vram_compression/import_etc2=false
+environment/default_environment="res://default_env.tres"

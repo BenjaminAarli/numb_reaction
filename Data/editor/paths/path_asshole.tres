@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Data/scripts/resources/story_path.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+display_name = "asshole"
+story = [ {
+"speaker": "Intro",
+"text": "Hello",
+"type": "cog_type_text"
+}, {
+"speaker": "Intro",
+"text": "I am the asshole",
+"type": "cog_type_text"
+}, {
+"speaker": "Intro",
+"text": "Bye",
+"type": "cog_type_text"
+} ]

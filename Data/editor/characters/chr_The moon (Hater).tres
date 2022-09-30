@@ -1,0 +1,15 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Data/scripts/resources/character.gd" type="Script" id=1]
+[ext_resource path="res://images/portraits/border_transparent.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+fname = "Souta"
+display_name = "The moon (Hater)"
+job_title = "Hierophant"
+description = "A proud hardworking man who was married to a woman many years ago. Due to reasons he was powerless against; his wife passed away. Looking for someone to blame; he blamed the moon.
+
+He spends a lot of time staring at the moon in open sky areas; waiting for it to do something... anything. or until he can get to it."
+portrait = ExtResource( 2 )
+nameColor = Color( 0, 0, 0, 1 )

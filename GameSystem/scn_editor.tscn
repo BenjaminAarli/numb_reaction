@@ -1,0 +1,1640 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://GameSystem/scripts/EditorScript.gd" type="Script" id=1]
+[ext_resource path="res://fonts/CabinBold-DEDD.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://images/portraits/Bearded Glasses Man.png" type="Texture" id=3]
+
+[sub_resource type="StyleBoxFlat" id=3]
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.0941176, 0.0941176, 0.0941176, 1 )
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends GridContainer
+
+onready var daddy = $\"../../..\"
+
+# all block loaders. 
+var block     = preload(\"res://Cogs/cogBlank.tscn\")
+var textblock = preload(\"res://Cogs/cogText.tscn\")
+var treeblock = preload(\"res://Cogs/cogTree.tscn\")
+var branchblock = preload(\"res://Cogs/cogBranch.tscn\")
+var treeendblock 	= preload(\"res://Cogs/cogTreeEnd.tscn\")
+var change_pathblock = preload(\"res://Cogs/cogChangePath.tscn\")
+
+var statcheckblock 	= preload(\"res://Editor/ed_statcheck.tscn\")
+var dicecheckblock 	= preload(\"res://Editor/ed_dicecheck.tscn\")
+var check_successblock = preload(\"res://Editor/ed_check_success.tscn\")
+var check_failureblock = preload(\"res://Editor/ed_check_failure.tscn\")
+var check_passive 	= preload(\"res://Editor/ed_passive_check.tscn\")
+var labelblock 		= preload(\"res://Editor/ed_label.tscn\")
+var gotoblock  		= preload(\"res://Editor/ed_goto.tscn\")
+var changebgblock 	= preload(\"res://Editor/ed_changebg.tscn\")
+
+func _on_GridContainer_sort_children():
+	check_list_sort()
+	pass
+
+func check_list_sort():
+	var tree = []
+	var branch = []
+	
+	for c in get_children():
+		if c.type == Data.COG_TYPE_TREE_END:
+			tree.pop_back()
+		
+		if tree.size() == 0:
+			c.add_to_right = 0
+		
+		if tree.size() > 0:
+			c.add_to_right = 8 * tree.size()
+		
+		if c.type == Data.COG_TYPE_TREE:
+			tree.append(c)
+		pass
+	pass
+
+var grab_pos = null
+
+func on_child_grab(child):
+	grab_pos = child.get_mid_pos()
+	daddy.selected_child = child
+	daddy.selected_position = child.get_index()
+	print(\"on_child_grab(\", child, \"): Index = \", str(child.get_index()))
+	pass
+
+# Keep in mind, y position will go up. 
+# ... and index with go down. 
+func on_child_release(child):
+	var moved_child = false
+	var cpos = child.get_mid_pos()
+	for c in get_children():
+		var move = c.get_mid_pos()
+		
+		if cpos < grab_pos: # Goes up
+			if cpos <= move:
+				move_child(child, c.get_index())
+				moved_child = true
+				break
+		if cpos > grab_pos: # Goes down
+			if cpos < move:
+				move_child(child, c.get_index() - 1)
+				moved_child = true
+				break
+	
+	if not moved_child and cpos < grab_pos: # goes up
+		move_child(child, 0)
+		child.set_moved_pos(0)
+	if not moved_child and cpos > grab_pos: # goes down
+		move_child(child, get_child_count() - 1)
+		child.set_moved_pos(0)
+		
+	if moved_child:
+		child.set_moved_pos(0)
+	
+	grab_pos = null
+	
+	check_list_sort()
+	pass
+
+var colr = [128, 128, 128]
+var blocks_spawned = 0
+
+func generate_cogwheel_using_file(file):
+	for f in file:
+		generate_block(f)
+	daddy.emit_signal(\"file_loaded\")
+	pass
+
+func generate_block(data):
+	var nc
+	match data.type:
+		Data.COG_TYPE_TEXT:
+			nc = textblock.instance()
+			nc.set_data(data)
+		Data.COG_TYPE_TREE:
+			nc = treeblock.instance()
+			nc.set_data(data)
+		Data.COG_TYPE_TREE_END:
+			nc = treeendblock.instance()
+		Data.COG_TYPE_BRANCH:
+			nc = branchblock.instance()
+			nc.set_data(data)
+		Data.COG_TYPE_CHANGE_PATH:
+			nc = change_pathblock.instance()
+			nc.set_data(data)
+		_: 
+			print(\"Genblock data: \", str(data.type))
+			print(\"genblock data is not a part of known types.\")
+			return 0
+	
+	nc.connect(\"onRelease\", self, \"on_child_release\")
+	nc.connect(\"onGrab\", self, \"on_child_grab\")
+	
+	add_child(nc)
+	pass
+
+func add_block(block_type):
+	var nc = block_type.instance()
+	nc.connect(\"onRelease\", self, \"on_child_release\")
+	nc.connect(\"onGrab\", self, \"on_child_grab\")
+	
+	add_child(nc)
+	blocks_spawned += 1
+	pass
+
+# Give each part that needs data, their data.
+func update_each_part(data):
+	
+	for p in get_children():
+		p.set_data(data)
+		pass
+	pass
+
+func _on_AddBlock_pressed():
+	add_block(block)
+	pass
+
+func _on_AddTextblock_pressed():
+	add_block(textblock)
+	pass
+
+func _on_btn_tree_pressed():
+	add_block(treeblock)
+	pass
+
+func _on_btn_path_pressed():
+	add_block(branchblock)
+	pass
+
+
+func _on_btn_tree_end_pressed():
+	add_block(treeendblock)
+	pass
+
+
+func _on_btn_dicecheck_pressed():
+	add_block(dicecheckblock)
+	pass 
+
+
+func _on_btn_statcheck_pressed():
+	add_block(statcheckblock)
+	pass 
+
+
+func _on_btn_passive_check_pressed():
+	add_block(check_passive)
+	pass
+
+
+func _on_btn_check_success_pressed():
+	add_block(check_successblock)
+	pass 
+
+
+func _on_btn_check_failure_pressed():
+	add_block(check_failureblock)
+	pass 
+
+
+func _on_btn_label_pressed():
+	add_block(labelblock)
+	pass
+
+
+func _on_btn_goto_pressed():
+	add_block(gotoblock)
+	pass 
+
+
+func _on_btn_changebg_pressed():
+	add_block(changebgblock)
+	pass
+
+
+func _on_btn_change_path_pressed():
+	add_block(change_pathblock)
+	pass
+
+
+func _on_scn_editor_file_data_has_changed(data):
+	update_each_part(data)
+	pass
+
+func _on_Paths_path_data_updated(data):
+	pass # Replace with function body.
+"
+
+[sub_resource type="GDScript" id=9]
+script/source = "extends Tabs
+
+var path = \"res://Data/game/stories/\"
+
+var current_story_name = \"Numb Reaction\"
+
+signal file_data_updated(data)
+
+func _ready():
+	pass
+
+"
+
+[sub_resource type="GDScript" id=10]
+script/source = "extends Control
+
+# FileInfo Hover for info script.
+
+func _ready():
+	$Control.hide()
+	pass
+
+
+
+func _on_FileInfo_mouse_entered():
+	$Control.show()
+	pass 
+
+
+func _on_FileInfo_mouse_exited():
+	$Control.hide()
+	pass
+"
+
+[sub_resource type="GDScript" id=6]
+script/source = "extends Tabs
+
+# Section PATHS
+
+signal path_data_updated(data)
+
+onready var List = $ItemList
+onready var NewPathName = $NewPathName
+
+onready var daddy = $\"../../..\"
+
+var path = \"res://Data/editor/paths/\"
+
+var current_path_name = null
+
+func _ready():
+	load_paths()
+	is_editable()
+
+func is_editable():
+	pass
+
+# Path Editing, Getting and Setting.
+
+func add_path(text: String):
+	List.add_item(text)
+	NewPathName.text = \"\"
+	emit_signal(\"path_data_updated\", get_all_paths())
+	pass
+
+func remove_path(index: int):
+	if list_get_selected_item() != null:
+		List.remove_item(index)
+	emit_signal(\"path_data_updated\", get_all_paths())
+	pass
+
+func edit_path(index: int):
+	if list_get_selected_item() != null:
+		pass
+	pass
+
+# Path File getting.
+
+func get_all_path_files():
+	var files = []
+	var dir = Directory.new()
+	dir.open(path)
+	dir.list_dir_begin()
+	
+	while true:
+		var file = dir.get_next()
+		if file == \"\":
+			break
+		elif not file.begins_with(\".\") and file.begins_with(\"path\"):
+			files.append(path + file)
+	
+	dir.list_dir_end()
+	return files
+
+func get_all_paths():
+	var files = get_all_path_files()
+	
+	var paths = {}
+	
+	for f in files:
+		var pth = ResourceLoader.load(str(f))
+		paths[pth.display_name] = pth
+	print(\"get_all_paths(): \", str(paths))
+	return paths
+
+# File Editing, Getting and Setting.
+
+func remove_file(pname):
+	var dir = Directory.new()
+	dir.open(path)
+	dir.list_dir_begin()
+	while true:
+		var file = dir.get_next()
+		if file == \"\":
+			break
+		elif not file.begins_with(\".\") and file.begins_with(\"path\"):
+			if file.begins_with(\"path_\" + pname):
+				dir.remove(\"path_\" + pname + \".tres\")
+				print(\"Path Removed: \", \"path_\" + pname)
+			pass
+	dir.list_dir_end()
+	pass
+
+# Save and Load Paths
+
+func save_path(pth: numb_path):
+	print(\"save_path(): PTH: \", pth.display_name)
+	ResourceSaver.save(path + \"path_\" + pth.display_name + \".tres\", pth)
+	pass
+
+func load_paths(): # Load all paths.
+	List.clear()
+	for p in get_all_paths().values():
+		List.add_item(str(p.display_name))
+	pass
+
+# Paths creation # 
+
+# Keep in mind, we are not saving these; just making them. 
+# To save them, use save_path(make_new_path(\"name of path\"))
+func make_new_path(pname):
+	var _path = numb_path.new()
+	_path.story = [] # Empty because its new
+	_path.display_name = str(pname)
+	return _path
+
+func make_path(pname, pdata):
+	var _path = numb_path.new()
+	_path.story = pdata # Empty because its new
+	_path.display_name = str(pname)
+	return _path
+
+func make_current_path():
+	var _path = numb_path.new()
+	_path.story = daddy.get_current_path()
+	_path.display_name = str(current_path_name)
+	return _path
+
+# List Functions
+
+func list_get_selected_item():
+	if List.get_selected_items()[-1] > -1:
+		return List.get_selected_items()[-1]
+	else:
+		return null
+	pass
+
+func list_get_selected_text():
+	return List.get_item_text(List.get_selected_items()[-1])
+
+func list_get_selected_data():
+	if list_get_selected_text() == null:
+		return null
+	else:
+		return get_all_paths()[list_get_selected_text()]
+
+func add_paths_to_list(arr):
+	daddy.array_to_path(arr)
+	pass
+
+# SIGNALS # SIGNALS # SIGNALS # SIGNALS # SIGNALS # SIGNALS #
+# ///////////////////////////////////////////////////////// #
+# SIGNALS # SIGNALS # SIGNALS # SIGNALS # SIGNALS # SIGNALS #
+
+func _on_NewPathName_text_changed(new_text):
+	is_editable()
+	pass
+
+func _on_ItemList_item_selected(index):
+	add_paths_to_list(list_get_selected_data()[\"story\"])
+	current_path_name = list_get_selected_text()
+	daddy.update_list_data()
+	emit_signal(\"path_data_updated\", get_all_paths())
+	pass
+
+func _on_new_path_pressed():
+	save_path(make_new_path(str(NewPathName.text)))
+	add_path(str(NewPathName.text))
+	daddy.update_list_data()
+	emit_signal(\"path_data_updated\", get_all_paths())
+	pass
+
+func _on_edit_path_pressed():
+	pass
+
+func _on_remove_path_pressed():
+	remove_file(list_get_selected_text())
+	remove_path(list_get_selected_item())
+	load_paths()
+	emit_signal(\"path_data_updated\", get_all_paths())
+	pass
+
+func _on_savePath_pressed():
+	save_path(make_current_path())
+	emit_signal(\"path_data_updated\", get_all_paths())
+	pass
+
+func _on_Paths_path_data_updated(data):
+	print(\"/    //////////  Paths Updated: \", data.keys()[0])
+	pass # Replace with function body.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
+
+
+
+
+"
+
+[sub_resource type="GDScript" id=5]
+script/source = "extends Tabs
+
+# Section CHARACTER CREATION
+
+signal character_data_updated(data)
+
+onready var list 		= $ItemList
+onready var charName 	= $MakeAChar/charName
+onready var description = $MakeAChar/description
+onready var displayName = $MakeAChar/displayName
+onready var portrait    = $TextureButton
+onready var hasCharacterBeenEdited = $hasCharacterBeenEdited
+
+onready var active_characters := get_node(\"active_characters_list\") as ItemList
+
+onready var daddy = $\"../../..\"
+
+var noPortraitTexture = preload(\"res://images/portraits/unknown_man.png\")
+
+var characters = {}
+
+# Save Stuff
+var save_path = \"res://Data/editor/characters/\"
+var file_name = \"test.tres\"
+
+# Portraits Location
+var portrait_path = \"res://images/portraits/\"
+
+func _ready():
+	$FD_GetTexture.current_dir = portrait_path
+	characters = get_all_characters()
+	ui_set_character_in_list()
+	update_data()
+	pass 
+
+func update_data():
+	active_characters.items.clear()
+	
+	var _chars = get_all_characters(true) as Array
+	var _active_chars_names = active_characters.items
+	
+	var ac = []
+	
+	for dn in _active_chars_names:
+		if typeof(dn) == TYPE_STRING:
+			if _chars.find(dn):
+				ac.append(dn)
+			pass
+		if dn is numb_character:
+			if _chars.find(dn):
+				ac.append(dn)
+			pass
+	
+	Data.ed_characters = ac
+	pass
+
+func is_current_character_saved():
+	if get_selected_item() == null:
+		return false
+	
+	var current_character_filedata = get_all_characters(true)[get_selected_item()]
+	var current_character_editordata = get_editor_character_data()
+	
+	if current_character_filedata == current_character_editordata:
+		hasCharacterBeenEdited.show()
+		return true
+	else:
+		hasCharacterBeenEdited.hide()
+		return false
+	pass
+
+func ui_set_character_in_list():
+	list.clear()
+	characters.clear()
+	characters = get_all_characters()
+	for c in characters:
+		list.add_item(c)
+	pass
+
+func get_all_character_files():
+	var files = []
+	var dir = Directory.new()
+	dir.open(save_path)
+	dir.list_dir_begin()
+	
+	while true:
+		var file = dir.get_next()
+		if file == \"\":
+			break
+		elif not file.begins_with(\".\") and file.begins_with(\"chr\"):
+			files.append(save_path + file)
+	
+	dir.list_dir_end()
+	return files
+
+func get_all_characters(useArray = false):
+	var files = get_all_character_files()
+	var _characters
+	if useArray:
+		_characters = []
+		for f in files:
+			var cha = ResourceLoader.load(str(f))
+			_characters.append(cha)
+	if not useArray:
+		_characters = {}
+		for f in files:
+			var cha = ResourceLoader.load(str(f))
+			_characters[cha.display_name] = cha
+		
+	return _characters
+
+func add_char_to_list(cha):
+	list.add_item(cha.display_name)
+	characters[cha.display_name] = cha
+	save_character_to_file(cha)
+	ui_set_character_in_list()
+	update_data()
+	pass
+
+func remove_char_from_list(index: int):
+	list.remove_item(index)
+	characters.erase(characters.get(index))
+	ui_set_character_in_list()
+	update_data()
+	pass
+
+func edit_char(index: int):
+	var cha = characters[list.get_item_text(index)]
+	
+	charName.text 	 = cha.fname
+	displayName.text = cha.display_name
+	description.text = cha.description
+	if cha.portrait != null:
+		portrait.texture_normal = cha.portrait
+	else:
+		portrait.texture_normal = noPortraitTexture
+	
+	check_editability()
+	update_data()
+	pass
+
+func text_entered_display_name(text: String):
+	check_editability()
+	pass
+
+func check_editability():
+	# CAN EDIT
+	if displayName.text.length() != 0:
+		charName.editable = true
+		description.readonly = false
+		portrait.disabled = false
+	# CANNOT EDIT
+	else: 
+		charName.editable = false
+		description.readonly = true
+		portrait.disabled = true
+		if portrait.texture_normal != load(\"res://images/portraits/border_transparent.png\"):
+			portrait.texture_normal = load(\"res://images/portraits/border_transparent.png\")
+	pass
+
+func clear_edits():
+	# Reset the name texts
+	charName.text 		= \"\"
+	displayName.text 	= \"\"
+	description.text 	= \"\"
+	portrait.texture_normal = load(\"res://images/portraits/Bearded Glasses Man.png\")
+	pass
+
+func get_selected_item():
+	if list.get_selected_items().size() > 0:
+		return list.get_selected_items()[-1]
+	else:
+		return null
+
+func get_editor_character_data():
+	var data = numb_character.new()
+	data.fname 		  = str(charName.text)
+	data.description  = str(description.text)
+	data.display_name = str(displayName.text)
+	data.portrait	  = portrait.texture_normal
+	return data
+
+func save_character_to_file(cha: numb_character):
+	ResourceSaver.save(save_path + \"chr_\" + cha.display_name + \".tres\", cha)
+	pass
+
+func save_character_from_list():
+	if list.get_selected_items().size() > 0:
+		var selected = list.get_selected_items()[-1]
+		ResourceSaver.save(save_path + \"chr_\" + characters[characters.keys()[selected]].display_name + \".tres\", characters[characters.keys()[selected]])
+	pass
+
+func save_characters_all():
+	for c in characters.keys().size():
+		ResourceSaver.save(save_path + \"chr_\" + characters[characters.keys()[c]].display_name + \".tres\", characters[characters.keys()[c]])
+	pass
+
+# SIGNALS # SIGNALS # SIGNALS #	# SIGNALS # SIGNALS # SIGNALS ## SIGNALS # SIGNALS # SIGNALS #
+# /////////////////////////// # # /////////////////////////// ## /////////////////////////// # 
+# SIGNALS # SIGNALS # SIGNALS # # SIGNALS # SIGNALS # SIGNALS ## SIGNALS # SIGNALS # SIGNALS #
+
+# Button Signals
+
+func _on_btnAdd_pressed():
+	add_char_to_list(get_editor_character_data())
+	clear_edits()
+	ui_set_character_in_list()
+	pass 
+
+func _on_btnEdit_pressed():
+	add_char_to_list(get_editor_character_data())
+	ui_set_character_in_list()
+	pass 
+
+func _on_btnRemove_pressed():
+	var dir = Directory.new()
+	dir.remove(save_path + \"chr_\" + characters[characters.keys()[list.get_selected_items()[-1]]].display_name + \".tres\")
+	remove_char_from_list(list.get_selected_items()[-1])
+	ui_set_character_in_list()
+	pass 
+
+func _on_btnClear_pressed():
+	clear_edits()
+	list.unselect_all()
+	ui_set_character_in_list()
+	pass 
+
+# Item List Signals
+
+func _on_ItemList_item_selected(index):
+	edit_char(index)
+	daddy.update_list_data()
+	pass
+
+func _on_ItemList_nothing_selected():
+	clear_edits()
+	list.unselect_all()
+	daddy.update_list_data()
+	pass
+
+# Characters start with \"chr_\"
+func _on_btnSaveChar_pressed():
+	save_character_from_list()
+	ui_set_character_in_list()
+	pass
+
+
+func _on_btnSaveCharAll_pressed():
+	save_characters_all()
+	ui_set_character_in_list()
+	pass
+
+func _on_displayName_text_changed(new_text):
+	text_entered_display_name(new_text)
+	check_editability()
+	is_current_character_saved()
+	pass
+
+func set_character_portrait(tex):
+	portrait.texture_normal = tex
+	check_editability()
+	is_current_character_saved()
+	pass
+
+func _on_FD_GetTexture_file_selected(path):
+	set_character_portrait(load(path))
+	pass # Replace with function body.
+
+
+func _on_TextureButton_pressed():
+	$FD_GetTexture.popup_centered(Vector2(900, 600))
+	pass # Replace with function body.
+
+
+func _on_charName_text_changed(new_text):
+	check_editability()
+	is_current_character_saved()
+	pass # Replace with function body.
+
+
+func _on_description_text_changed():
+	check_editability()
+	is_current_character_saved()
+	pass # Replace with function body.
+
+# ACTIVE CHARACTERS SIGNALS
+
+func _on_ItemList_item_activated(index):
+	active_characters.add_item(list.get_item_text(index))
+	pass # Replace with function body.
+"
+
+[sub_resource type="GDScript" id=11]
+script/source = "extends ItemList
+
+
+var active_characters = []
+
+
+func _on_active_characters_list_nothing_selected():
+	unselect_all()
+	pass # Replace with function body.
+
+
+func _on_active_characters_list_item_activated(index):
+	remove_item(index)
+	pass # Replace with function body.
+"
+
+[sub_resource type="DynamicFont" id=7]
+font_data = ExtResource( 2 )
+
+[sub_resource type="Theme" id=8]
+default_font = SubResource( 7 )
+
+[node name="scn_editor" type="Node2D"]
+script = ExtResource( 1 )
+__meta__ = {
+"_editor_description_": "Had to be added, because extending didn't work without a node attached to it.
+
+UPDATE: I'm numb and didn't realize how extending worked. Not fixed but information gained"
+}
+
+[node name="Panels" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="Panels"]
+self_modulate = Color( 0.682353, 0.682353, 0.682353, 1 )
+margin_right = 1920.0
+margin_bottom = 1080.0
+
+[node name="Editor" type="Control" parent="."]
+margin_left = 1000.0
+margin_top = 112.0
+margin_right = 1632.0
+margin_bottom = 1048.0
+mouse_filter = 2
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="Panel2" type="Panel" parent="Editor"]
+self_modulate = Color( 0.337255, 0.337255, 0.337255, 1 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -8.0
+margin_top = -8.0
+margin_right = 8.0
+margin_bottom = 8.0
+custom_styles/panel = SubResource( 3 )
+
+[node name="Panel" type="Panel" parent="Editor"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 4 )
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Editor"]
+anchor_left = 0.025
+anchor_top = 0.015
+anchor_right = 0.975
+anchor_bottom = 0.985
+margin_left = 0.2
+margin_top = 0.28
+margin_right = -0.200012
+margin_bottom = -0.280029
+follow_focus = true
+scroll_horizontal_enabled = false
+
+[node name="GridContainer" type="GridContainer" parent="Editor/ScrollContainer"]
+margin_right = 600.0
+margin_bottom = 907.36
+size_flags_horizontal = 15
+size_flags_vertical = 15
+script = SubResource( 2 )
+
+[node name="Buttons" type="Control" parent="."]
+margin_left = 960.0
+margin_right = 1920.0
+margin_bottom = 56.0
+mouse_filter = 2
+
+[node name="Panel2" type="Panel" parent="Buttons"]
+margin_left = -960.0
+margin_right = 960.0
+margin_bottom = 56.0
+
+[node name="btnFileMenu" type="MenuButton" parent="Buttons/Panel2"]
+margin_left = 32.0
+margin_top = 16.0
+margin_right = 112.0
+margin_bottom = 40.0
+enabled_focus_mode = 0
+text = "File"
+flat = false
+items = [ "New File", null, 0, false, false, 0, 0, null, "", false, "Save File", null, 0, false, false, 1, 0, null, "", false, "Save File As", null, 0, false, false, 2, 0, null, "", false, "Load File", null, 0, false, false, 3, 0, null, "", false, "Exit Editor", null, 0, false, false, 4, 0, null, "", false ]
+
+[node name="btnSaveFile" type="Button" parent="Buttons/Panel2"]
+margin_left = 136.0
+margin_top = 16.0
+margin_right = 216.0
+margin_bottom = 40.0
+text = "Save"
+
+[node name="btnLoadFile" type="Button" parent="Buttons/Panel2"]
+margin_left = 232.0
+margin_top = 16.0
+margin_right = 312.0
+margin_bottom = 40.0
+text = "Load"
+
+[node name="btnGenGameFile" type="Button" parent="Buttons/Panel2"]
+margin_left = 328.0
+margin_top = 16.0
+margin_right = 472.0
+margin_bottom = 40.0
+text = "Generate Game File"
+
+[node name="btnTestGameFile" type="Button" parent="Buttons/Panel2"]
+margin_left = 496.0
+margin_top = 16.0
+margin_right = 640.0
+margin_bottom = 40.0
+text = "Test Game File"
+
+[node name="btnTestFromPosition" type="Button" parent="Buttons/Panel2"]
+margin_left = 664.0
+margin_top = 16.0
+margin_right = 808.0
+margin_bottom = 40.0
+text = "Test From position"
+
+[node name="Panel" type="Panel" parent="Buttons"]
+margin_left = 696.0
+margin_top = 72.0
+margin_right = 944.0
+margin_bottom = 1024.0
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Buttons/Panel"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 240.0
+margin_bottom = 536.0
+mouse_filter = 2
+
+[node name="AddBlock" type="Button" parent="Buttons/Panel/VBoxContainer"]
+visible = false
+margin_right = 232.0
+margin_bottom = 20.0
+focus_mode = 0
+enabled_focus_mode = 0
+text = "PLAIN"
+align = 0
+
+[node name="AddTextblock" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_right = 232.0
+margin_bottom = 20.0
+focus_mode = 0
+enabled_focus_mode = 0
+text = "TEXT"
+align = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 24.0
+margin_right = 232.0
+margin_bottom = 44.0
+mouse_filter = 2
+
+[node name="btn_tree" type="Button" parent="Buttons/Panel/VBoxContainer/HBoxContainer"]
+margin_right = 114.0
+margin_bottom = 20.0
+focus_mode = 0
+size_flags_horizontal = 3
+enabled_focus_mode = 0
+text = "TREE"
+align = 0
+
+[node name="btn_tree_end" type="Button" parent="Buttons/Panel/VBoxContainer/HBoxContainer"]
+margin_left = 118.0
+margin_right = 232.0
+margin_bottom = 20.0
+focus_mode = 0
+size_flags_horizontal = 3
+enabled_focus_mode = 0
+text = "TREE END"
+align = 0
+
+[node name="btn_path" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 48.0
+margin_right = 232.0
+margin_bottom = 68.0
+focus_mode = 0
+enabled_focus_mode = 0
+text = "PATH"
+align = 0
+
+[node name="btn_change_path" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 72.0
+margin_right = 232.0
+margin_bottom = 92.0
+text = "Change Path"
+align = 0
+
+[node name="DIVIDER5" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 96.0
+margin_right = 232.0
+margin_bottom = 116.0
+flat = true
+
+[node name="btn_dicecheck" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 120.0
+margin_right = 232.0
+margin_bottom = 140.0
+focus_mode = 0
+disabled = true
+enabled_focus_mode = 0
+text = "DICECHECK"
+
+[node name="btn_statcheck" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 144.0
+margin_right = 232.0
+margin_bottom = 164.0
+focus_mode = 0
+disabled = true
+enabled_focus_mode = 0
+text = "STATCHECK"
+
+[node name="btn_passive_check" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 168.0
+margin_right = 232.0
+margin_bottom = 188.0
+focus_mode = 0
+disabled = true
+enabled_focus_mode = 0
+text = "PASSIVE CHECK"
+
+[node name="DIVIDER4" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 192.0
+margin_right = 232.0
+margin_bottom = 212.0
+flat = true
+
+[node name="btn_check_success" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 216.0
+margin_right = 232.0
+margin_bottom = 236.0
+focus_mode = 0
+disabled = true
+enabled_focus_mode = 0
+text = "Check Success"
+align = 0
+
+[node name="btn_check_failure" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 240.0
+margin_right = 232.0
+margin_bottom = 260.0
+focus_mode = 0
+disabled = true
+enabled_focus_mode = 0
+text = "Check Failure"
+align = 0
+
+[node name="DIVIDER" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 264.0
+margin_right = 232.0
+margin_bottom = 284.0
+flat = true
+
+[node name="btn_label" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 288.0
+margin_right = 232.0
+margin_bottom = 308.0
+focus_mode = 0
+disabled = true
+enabled_focus_mode = 0
+text = "LABEL"
+align = 0
+
+[node name="btn_goto" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 312.0
+margin_right = 232.0
+margin_bottom = 332.0
+focus_mode = 0
+disabled = true
+enabled_focus_mode = 0
+text = "GO-TO Label"
+align = 0
+
+[node name="DIVIDER2" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 336.0
+margin_right = 232.0
+margin_bottom = 356.0
+flat = true
+
+[node name="btn_changebg" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 360.0
+margin_right = 232.0
+margin_bottom = 380.0
+focus_mode = 0
+disabled = true
+enabled_focus_mode = 0
+text = "Change BG"
+align = 0
+
+[node name="DIVIDER3" type="Button" parent="Buttons/Panel/VBoxContainer"]
+margin_top = 384.0
+margin_right = 232.0
+margin_bottom = 404.0
+flat = true
+
+[node name="AddWhatever10" type="Button" parent="Buttons/Panel/VBoxContainer"]
+visible = false
+margin_top = 408.0
+margin_right = 232.0
+margin_bottom = 428.0
+text = "Add Whatever"
+align = 0
+
+[node name="AddWhatever11" type="Button" parent="Buttons/Panel/VBoxContainer"]
+visible = false
+margin_top = 432.0
+margin_right = 232.0
+margin_bottom = 452.0
+text = "Add Whatever"
+align = 0
+
+[node name="AddWhatever12" type="Button" parent="Buttons/Panel/VBoxContainer"]
+visible = false
+margin_top = 456.0
+margin_right = 232.0
+margin_bottom = 476.0
+text = "Add Whatever"
+align = 0
+
+[node name="AddWhatever13" type="Button" parent="Buttons/Panel/VBoxContainer"]
+visible = false
+margin_top = 480.0
+margin_right = 232.0
+margin_bottom = 500.0
+text = "Add Whatever"
+align = 0
+
+[node name="AddWhatever14" type="Button" parent="Buttons/Panel/VBoxContainer"]
+visible = false
+margin_top = 504.0
+margin_right = 232.0
+margin_bottom = 524.0
+text = "Add Whatever"
+align = 0
+
+[node name="AddWhatever15" type="Button" parent="Buttons/Panel/VBoxContainer"]
+visible = false
+margin_top = 528.0
+margin_right = 232.0
+margin_bottom = 548.0
+text = "Add Whatever"
+align = 0
+
+[node name="Control" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="SaveFileDialogue" type="FileDialog" parent="Control"]
+margin_right = 592.0
+margin_bottom = 480.0
+show_hidden_files = true
+
+[node name="loadFileDialogue" type="FileDialog" parent="Control"]
+margin_right = 568.0
+margin_bottom = 392.0
+window_title = "Open a File"
+mode = 0
+show_hidden_files = true
+
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="Control"]
+margin_left = 592.0
+margin_top = 248.0
+margin_right = 1392.0
+margin_bottom = 672.0
+window_title = "Are you sure you want to..."
+
+[node name="Mouse" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Label" type="Label" parent="Mouse"]
+margin_right = 40.0
+margin_bottom = 14.0
+
+[node name="Other" type="Control" parent="."]
+margin_left = 16.0
+margin_top = 80.0
+margin_right = 976.0
+margin_bottom = 1056.0
+
+[node name="TabContainer" type="TabContainer" parent="Other"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -16.0
+tab_align = 0
+
+[node name="File" type="Tabs" parent="Other/TabContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+script = SubResource( 9 )
+
+[node name="LineEdit" type="LineEdit" parent="Other/TabContainer/File"]
+margin_left = 12.0
+margin_top = 40.0
+margin_right = 372.0
+margin_bottom = 72.0
+placeholder_text = "New Story Name"
+
+[node name="ItemList" type="ItemList" parent="Other/TabContainer/File"]
+margin_left = 12.0
+margin_top = 80.0
+margin_right = 372.0
+margin_bottom = 496.0
+
+[node name="Button" type="Button" parent="Other/TabContainer/File"]
+visible = false
+margin_left = 380.0
+margin_top = 40.0
+margin_right = 492.0
+margin_bottom = 72.0
+text = "Add New File"
+
+[node name="Button2" type="Button" parent="Other/TabContainer/File"]
+margin_left = 388.0
+margin_top = 40.0
+margin_right = 536.0
+margin_bottom = 72.0
+text = "Make New Story"
+
+[node name="FileInfo" type="Control" parent="Other/TabContainer/File"]
+margin_left = 884.0
+margin_top = 8.0
+margin_right = 924.0
+margin_bottom = 48.0
+script = SubResource( 10 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="Panel" type="Panel" parent="Other/TabContainer/File/FileInfo"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Other/TabContainer/File/FileInfo"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "!"
+align = 1
+valign = 1
+
+[node name="Control" type="Control" parent="Other/TabContainer/File/FileInfo"]
+margin_left = -408.0
+margin_top = 8.0
+margin_right = -24.0
+margin_bottom = 264.0
+
+[node name="Panel" type="Panel" parent="Other/TabContainer/File/FileInfo/Control"]
+margin_left = 56.0
+margin_top = 16.0
+margin_right = 328.0
+margin_bottom = 240.0
+
+[node name="Label" type="Label" parent="Other/TabContainer/File/FileInfo/Control/Panel"]
+anchor_left = 0.021
+anchor_top = 0.031
+anchor_right = 0.979
+anchor_bottom = 0.969
+margin_left = -0.0640011
+margin_top = 0.0639997
+margin_right = 0.0639954
+margin_bottom = -0.0640106
+text = "A Story is the full file/folder of your current project. This is where all files associated with your game are. 
+
+Think of it as doom WADs; this is where you keep those but instead of wads, it's folders with all the data in them."
+autowrap = true
+
+[node name="Paths" type="Tabs" parent="Other/TabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+script = SubResource( 6 )
+
+[node name="ItemList" type="ItemList" parent="Other/TabContainer/Paths"]
+margin_left = 12.0
+margin_top = 160.0
+margin_right = 324.0
+margin_bottom = 928.0
+
+[node name="NewPathName" type="LineEdit" parent="Other/TabContainer/Paths"]
+margin_left = 12.0
+margin_top = 88.0
+margin_right = 324.0
+margin_bottom = 120.0
+placeholder_text = "New Path Name"
+
+[node name="buttons" type="Control" parent="Other/TabContainer/Paths"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="new_path" type="Button" parent="Other/TabContainer/Paths/buttons"]
+margin_left = 12.0
+margin_top = 56.0
+margin_right = 76.0
+margin_bottom = 80.0
+text = "Add"
+
+[node name="edit_path" type="Button" parent="Other/TabContainer/Paths/buttons"]
+margin_left = 84.0
+margin_top = 56.0
+margin_right = 148.0
+margin_bottom = 80.0
+text = "Edit"
+
+[node name="remove_path" type="Button" parent="Other/TabContainer/Paths/buttons"]
+margin_left = 244.0
+margin_top = 56.0
+margin_right = 324.0
+margin_bottom = 80.0
+text = "Remove"
+
+[node name="savePath" type="Button" parent="Other/TabContainer/Paths/buttons"]
+margin_left = 12.0
+margin_top = 128.0
+margin_right = 324.0
+margin_bottom = 152.0
+text = "Save Paths"
+
+[node name="FileInfo" type="Control" parent="Other/TabContainer/Paths"]
+margin_left = 884.0
+margin_top = 8.0
+margin_right = 924.0
+margin_bottom = 48.0
+script = SubResource( 10 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="Panel" type="Panel" parent="Other/TabContainer/Paths/FileInfo"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Other/TabContainer/Paths/FileInfo"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "!"
+align = 1
+valign = 1
+
+[node name="Control" type="Control" parent="Other/TabContainer/Paths/FileInfo"]
+margin_left = -408.0
+margin_top = 8.0
+margin_right = -24.0
+margin_bottom = 264.0
+
+[node name="Panel" type="Panel" parent="Other/TabContainer/Paths/FileInfo/Control"]
+margin_left = 56.0
+margin_top = 16.0
+margin_right = 328.0
+margin_bottom = 240.0
+
+[node name="Label" type="Label" parent="Other/TabContainer/Paths/FileInfo/Control/Panel"]
+anchor_left = 0.021
+anchor_top = 0.031
+anchor_right = 0.979
+anchor_bottom = 0.969
+margin_left = -0.0640011
+margin_top = 0.0639997
+margin_right = 0.0639954
+margin_bottom = -0.0640106
+text = "Paths are the building block containers of the entire game. Paths are just lots of blocks together; in order. 
+
+BLOCKS are the things on the right side of the screen. Those contain how the game moves forward. Each dialogue text is a block, each background change is a block, when music starts playing; it's a block that did that.
+
+Paths are where we store all that. "
+autowrap = true
+
+[node name="Characters" type="Tabs" parent="Other/TabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+script = SubResource( 5 )
+
+[node name="Helper" type="Control" parent="Other/TabContainer/Characters"]
+margin_left = 532.0
+margin_right = 944.0
+margin_bottom = 64.0
+
+[node name="ItemList" type="ItemList" parent="Other/TabContainer/Characters"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 492.0
+margin_top = 208.0
+margin_right = -4.0
+margin_bottom = -412.0
+
+[node name="active_characters_list" type="ItemList" parent="Other/TabContainer/Characters"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 492.0
+margin_top = 536.0
+margin_right = -4.0
+margin_bottom = -284.0
+script = SubResource( 11 )
+
+[node name="MakeAChar" type="Control" parent="Other/TabContainer/Characters"]
+margin_right = 40.0
+margin_bottom = 40.0
+theme = SubResource( 8 )
+
+[node name="displayName" type="LineEdit" parent="Other/TabContainer/Characters/MakeAChar"]
+margin_left = 4.0
+margin_top = 208.0
+margin_right = 484.0
+margin_bottom = 248.0
+focus_mode = 1
+placeholder_text = "Display Name"
+
+[node name="charName" type="LineEdit" parent="Other/TabContainer/Characters/MakeAChar"]
+margin_left = 4.0
+margin_top = 256.0
+margin_right = 484.0
+margin_bottom = 296.0
+focus_mode = 1
+editable = false
+placeholder_text = "Full Name"
+
+[node name="description" type="TextEdit" parent="Other/TabContainer/Characters/MakeAChar"]
+margin_left = 4.0
+margin_top = 304.0
+margin_right = 484.0
+margin_bottom = 480.0
+focus_mode = 1
+text = "Description for each character. I haver little else to say otehr thatn thataj tiatait iati iati iataaiwdial;dkawodka;owkd a wokda; owda;owdk ado ka;owkd a;owdka;wodk a;wodkaw;dok aodak aowkd a;owdk awod awo;dka wd;oakw d;oakwda;ow dka;owdk a;owdkaw; odkaw;od aw;odk aw;odka;wokd a;wokda;owkda;wod a;wokda;owkda;wodk;dak  odk o o o  o o  ;ok ;o k ook ;ok ujh poiuh u ho iuh liukh oli uho ljiknh p uh puh p uiohawo;dka wd;oakw d;oakwda;ow dka;owdk a;owdkaw; odkaw;od aw;odk aw;odka;wokd a;wokda;owkda;wod a;wokda;owkda;wodk;dak  odk o o o  o o  ;ok ;o k ook ;ok ujh poiuh u ho iuh liukh oli uho ljiknh p uh puh p uiohawo;dka wd;oakw d;oakwda;ow dka;owdk a;owdkaw; odkaw;od aw;odk aw;odka;wokd a;wokda;owkda;wod a;wokda;owkda;wodk;dak  odk o o o  o o  ;ok ;o k ook ;ok ujh poiuh u ho iuh liukh oli uho ljiknh p uh puh p uiohawo;dka wd;oakw d;oakwda;ow dka;owdk a;owdkaw; odkaw;od aw;odk aw;odka;wokd a;wokda;owkda;wod a;wokda;owkda;wodk;dak  odk o o o  o o  ;ok ;o k ook ;ok ujh poiuh u ho iuh liukh oli uho ljiknh p uh puh p uioh"
+readonly = true
+breakpoint_gutter = true
+highlight_all_occurrences = true
+wrap_enabled = true
+
+[node name="btnAdd" type="Button" parent="Other/TabContainer/Characters"]
+margin_left = 4.0
+margin_top = 160.0
+margin_right = 76.0
+margin_bottom = 200.0
+text = "Add"
+
+[node name="btnEdit" type="Button" parent="Other/TabContainer/Characters"]
+margin_left = 764.0
+margin_top = 176.0
+margin_right = 836.0
+margin_bottom = 200.0
+text = "Edit"
+
+[node name="btnRemove" type="Button" parent="Other/TabContainer/Characters"]
+margin_left = 844.0
+margin_top = 176.0
+margin_right = 924.0
+margin_bottom = 200.0
+text = "Remove"
+
+[node name="btnClear" type="Button" parent="Other/TabContainer/Characters"]
+margin_left = 84.0
+margin_top = 160.0
+margin_right = 156.0
+margin_bottom = 200.0
+text = "Clear"
+
+[node name="btnSaveChar" type="Button" parent="Other/TabContainer/Characters"]
+margin_left = 492.0
+margin_top = 176.0
+margin_right = 572.0
+margin_bottom = 200.0
+text = "Save This"
+
+[node name="btnSaveCharAll" type="Button" parent="Other/TabContainer/Characters"]
+margin_left = 580.0
+margin_top = 176.0
+margin_right = 652.0
+margin_bottom = 200.0
+text = "Save All"
+
+[node name="TextureButton" type="TextureButton" parent="Other/TabContainer/Characters"]
+margin_left = 356.0
+margin_top = 80.0
+margin_right = 476.0
+margin_bottom = 200.0
+texture_normal = ExtResource( 3 )
+expand = true
+
+[node name="FileInfo" type="Control" parent="Other/TabContainer/Characters"]
+visible = false
+margin_left = 900.0
+margin_top = 8.0
+margin_right = 940.0
+margin_bottom = 48.0
+script = SubResource( 10 )
+
+[node name="Panel" type="Panel" parent="Other/TabContainer/Characters/FileInfo"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Other/TabContainer/Characters/FileInfo"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "!"
+align = 1
+valign = 1
+
+[node name="Control" type="Control" parent="Other/TabContainer/Characters/FileInfo"]
+margin_left = -408.0
+margin_top = 8.0
+margin_right = -24.0
+margin_bottom = 264.0
+
+[node name="Panel" type="Panel" parent="Other/TabContainer/Characters/FileInfo/Control"]
+margin_left = 56.0
+margin_top = 16.0
+margin_right = 328.0
+margin_bottom = 240.0
+
+[node name="Label" type="Label" parent="Other/TabContainer/Characters/FileInfo/Control/Panel"]
+anchor_left = 0.021
+anchor_top = 0.031
+anchor_right = 0.979
+anchor_bottom = 0.969
+margin_left = -0.0640011
+margin_top = 0.0639997
+margin_right = 0.0639954
+margin_bottom = -0.0640106
+text = "Characters are the character data holders for all of your characters. 
+
+This is where you make, edit and remove characters from your game. 
+
+This is here, so that we can add neat little features; like - when a block using characters is added, we can get a list of characters to include or when removing a character in use, we can have a warning; showing them in use. "
+autowrap = true
+
+[node name="FD_GetTexture" type="FileDialog" parent="Other/TabContainer/Characters"]
+margin_left = 364.0
+margin_top = 128.0
+margin_right = 1088.0
+margin_bottom = 584.0
+window_title = "Open a File or Directory"
+resizable = true
+dialog_text = "Get a photo to show as this character! "
+dialog_autowrap = true
+mode = 3
+filters = PoolStringArray( "*.png" )
+show_hidden_files = true
+
+[node name="hasCharacterBeenEdited" type="Control" parent="Other/TabContainer/Characters"]
+margin_left = 164.0
+margin_top = 160.0
+margin_right = 300.0
+margin_bottom = 200.0
+
+[node name="Label" type="Label" parent="Other/TabContainer/Characters/hasCharacterBeenEdited"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "!!! NOT SAVED"
+align = 1
+valign = 1
+
+[connection signal="file_data_has_changed" from="." to="Editor/ScrollContainer/GridContainer" method="_on_scn_editor_file_data_has_changed"]
+[connection signal="sort_children" from="Editor/ScrollContainer/GridContainer" to="Editor/ScrollContainer/GridContainer" method="_on_GridContainer_sort_children"]
+[connection signal="pressed" from="Buttons/Panel2/btnSaveFile" to="." method="_on_btnSaveFile_pressed"]
+[connection signal="pressed" from="Buttons/Panel2/btnLoadFile" to="." method="_on_btnLoadFile_pressed"]
+[connection signal="pressed" from="Buttons/Panel2/btnGenGameFile" to="." method="_on_btnGenGameFile_pressed"]
+[connection signal="pressed" from="Buttons/Panel2/btnTestGameFile" to="." method="_on_btnTestGameFile_pressed"]
+[connection signal="pressed" from="Buttons/Panel2/btnTestFromPosition" to="." method="_on_btnTestFromPosition_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/AddBlock" to="Editor/ScrollContainer/GridContainer" method="_on_AddBlock_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/AddTextblock" to="Editor/ScrollContainer/GridContainer" method="_on_AddTextblock_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/HBoxContainer/btn_tree" to="Editor/ScrollContainer/GridContainer" method="_on_btn_tree_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/HBoxContainer/btn_tree_end" to="Editor/ScrollContainer/GridContainer" method="_on_btn_tree_end_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/btn_path" to="Editor/ScrollContainer/GridContainer" method="_on_btn_path_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/btn_change_path" to="Editor/ScrollContainer/GridContainer" method="_on_btn_change_path_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/btn_dicecheck" to="Editor/ScrollContainer/GridContainer" method="_on_btn_dicecheck_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/btn_statcheck" to="Editor/ScrollContainer/GridContainer" method="_on_btn_statcheck_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/btn_passive_check" to="Editor/ScrollContainer/GridContainer" method="_on_btn_passive_check_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/btn_check_success" to="Editor/ScrollContainer/GridContainer" method="_on_btn_check_success_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/btn_check_failure" to="Editor/ScrollContainer/GridContainer" method="_on_btn_check_failure_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/btn_label" to="Editor/ScrollContainer/GridContainer" method="_on_btn_label_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/btn_goto" to="Editor/ScrollContainer/GridContainer" method="_on_btn_goto_pressed"]
+[connection signal="pressed" from="Buttons/Panel/VBoxContainer/btn_changebg" to="Editor/ScrollContainer/GridContainer" method="_on_btn_changebg_pressed"]
+[connection signal="confirmed" from="Control/SaveFileDialogue" to="." method="_on_SaveFileDialogue_confirmed"]
+[connection signal="confirmed" from="Control/loadFileDialogue" to="." method="_on_loadFileDialogue_confirmed"]
+[connection signal="file_data_updated" from="Other/TabContainer/File" to="." method="_on_File_file_data_updated"]
+[connection signal="mouse_entered" from="Other/TabContainer/File/FileInfo" to="Other/TabContainer/File/FileInfo" method="_on_FileInfo_mouse_entered"]
+[connection signal="mouse_exited" from="Other/TabContainer/File/FileInfo" to="Other/TabContainer/File/FileInfo" method="_on_FileInfo_mouse_exited"]
+[connection signal="path_data_updated" from="Other/TabContainer/Paths" to="." method="_on_Paths_path_data_updated"]
+[connection signal="path_data_updated" from="Other/TabContainer/Paths" to="Editor/ScrollContainer/GridContainer" method="_on_Paths_path_data_updated"]
+[connection signal="path_data_updated" from="Other/TabContainer/Paths" to="Other/TabContainer/Paths" method="_on_Paths_path_data_updated"]
+[connection signal="item_selected" from="Other/TabContainer/Paths/ItemList" to="Other/TabContainer/Paths" method="_on_ItemList_item_selected"]
+[connection signal="text_changed" from="Other/TabContainer/Paths/NewPathName" to="Other/TabContainer/Paths" method="_on_NewPathName_text_changed"]
+[connection signal="pressed" from="Other/TabContainer/Paths/buttons/new_path" to="Other/TabContainer/Paths" method="_on_new_path_pressed"]
+[connection signal="pressed" from="Other/TabContainer/Paths/buttons/edit_path" to="Other/TabContainer/Paths" method="_on_edit_path_pressed"]
+[connection signal="pressed" from="Other/TabContainer/Paths/buttons/remove_path" to="Other/TabContainer/Paths" method="_on_remove_path_pressed"]
+[connection signal="pressed" from="Other/TabContainer/Paths/buttons/savePath" to="Other/TabContainer/Paths" method="_on_savePath_pressed"]
+[connection signal="mouse_entered" from="Other/TabContainer/Paths/FileInfo" to="Other/TabContainer/Paths/FileInfo" method="_on_FileInfo_mouse_entered"]
+[connection signal="mouse_exited" from="Other/TabContainer/Paths/FileInfo" to="Other/TabContainer/Paths/FileInfo" method="_on_FileInfo_mouse_exited"]
+[connection signal="character_data_updated" from="Other/TabContainer/Characters" to="." method="_on_Characters_character_data_updated"]
+[connection signal="item_activated" from="Other/TabContainer/Characters/ItemList" to="Other/TabContainer/Characters" method="_on_ItemList_item_activated"]
+[connection signal="item_selected" from="Other/TabContainer/Characters/ItemList" to="Other/TabContainer/Characters" method="_on_ItemList_item_selected"]
+[connection signal="nothing_selected" from="Other/TabContainer/Characters/ItemList" to="Other/TabContainer/Characters" method="_on_ItemList_nothing_selected"]
+[connection signal="item_activated" from="Other/TabContainer/Characters/active_characters_list" to="Other/TabContainer/Characters/active_characters_list" method="_on_active_characters_list_item_activated"]
+[connection signal="nothing_selected" from="Other/TabContainer/Characters/active_characters_list" to="Other/TabContainer/Characters/active_characters_list" method="_on_active_characters_list_nothing_selected"]
+[connection signal="text_changed" from="Other/TabContainer/Characters/MakeAChar/displayName" to="Other/TabContainer/Characters" method="_on_displayName_text_changed"]
+[connection signal="text_changed" from="Other/TabContainer/Characters/MakeAChar/charName" to="Other/TabContainer/Characters" method="_on_charName_text_changed"]
+[connection signal="text_changed" from="Other/TabContainer/Characters/MakeAChar/description" to="Other/TabContainer/Characters" method="_on_description_text_changed"]
+[connection signal="pressed" from="Other/TabContainer/Characters/btnAdd" to="Other/TabContainer/Characters" method="_on_btnAdd_pressed"]
+[connection signal="pressed" from="Other/TabContainer/Characters/btnEdit" to="Other/TabContainer/Characters" method="_on_btnEdit_pressed"]
+[connection signal="pressed" from="Other/TabContainer/Characters/btnRemove" to="Other/TabContainer/Characters" method="_on_btnRemove_pressed"]
+[connection signal="pressed" from="Other/TabContainer/Characters/btnClear" to="Other/TabContainer/Characters" method="_on_btnClear_pressed"]
+[connection signal="pressed" from="Other/TabContainer/Characters/btnSaveChar" to="Other/TabContainer/Characters" method="_on_btnSaveChar_pressed"]
+[connection signal="pressed" from="Other/TabContainer/Characters/btnSaveCharAll" to="Other/TabContainer/Characters" method="_on_btnSaveCharAll_pressed"]
+[connection signal="pressed" from="Other/TabContainer/Characters/TextureButton" to="Other/TabContainer/Characters" method="_on_TextureButton_pressed"]
+[connection signal="mouse_entered" from="Other/TabContainer/Characters/FileInfo" to="Other/TabContainer/Characters/FileInfo" method="_on_FileInfo_mouse_entered"]
+[connection signal="mouse_exited" from="Other/TabContainer/Characters/FileInfo" to="Other/TabContainer/Characters/FileInfo" method="_on_FileInfo_mouse_exited"]
+[connection signal="file_selected" from="Other/TabContainer/Characters/FD_GetTexture" to="Other/TabContainer/Characters" method="_on_FD_GetTexture_file_selected"]

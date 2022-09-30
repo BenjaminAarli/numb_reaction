@@ -1,0 +1,15 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Data/scripts/resources/character.gd" type="Script" id=1]
+[ext_resource path="res://images/skills_cc/V2/Horror.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+fname = "The Voided Abyss"
+display_name = "mind_Abyssals"
+job_title = "Hierophant"
+description = "The unsalted dredge at the bottom of the sea where there is the corpse of an old machine to the deep caverns filled with dangerous gasses and parrots to the burning coal mine's mine workers to the dying mother and the baby inside of her to the drowing dog's burned lungs to the skys above.  
+
+I am waiting..."
+portrait = ExtResource( 2 )
+nameColor = Color( 0, 0, 0, 1 )

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Data/scripts/resources/character.gd" type="Script" id=1]
+[ext_resource path="res://images/portraits/Chemical Man.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+fname = "Moshi Heen"
+display_name = "Mushee"
+job_title = "Hierophant"
+description = "Late-to-middle aged man. Speaks common well but his eastern accent is warm and inviting. He works the late shift, and sometimes the midnight shifts. 
+
+"
+portrait = ExtResource( 2 )
+nameColor = Color( 0, 0, 0, 1 )
