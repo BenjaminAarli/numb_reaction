@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://bullshit remove me later.gd" type="Script" id=1]
+[ext_resource path="res://I exist insdie.gd" type="Script" id=2]
 
 [node name="bullshit remove me later" type="Node2D"]
 script = ExtResource( 1 )
+
+[node name="I exist insdie" type="Node2D" parent="."]
+script = ExtResource( 2 )

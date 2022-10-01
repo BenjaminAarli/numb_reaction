@@ -9,6 +9,7 @@ extends Node2D
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	print("I am the bullshit that will be removed, hopefully.")
+	print("dupe: I am the bullshit that will be removed, hopefully.")
 	pass # Replace with function body.
 
 
