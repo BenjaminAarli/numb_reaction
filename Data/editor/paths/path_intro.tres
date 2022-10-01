@@ -6,15 +6,94 @@
 script = ExtResource( 1 )
 display_name = "intro"
 story = [ {
-"speaker": "intro",
-"text": "intro",
+"speaker": "Void",
+"text": "\"You breathe in yet again. The cold air cuts your lungs awake. You are alive...still.\"",
 "type": "cog_type_text"
 }, {
-"speaker": "intro",
-"text": "intro",
+"speaker": "Wisdom",
+"text": "\"That stench is food scraps, probably from the eastern restaurant that sells a mixture of sea foods and alcoholic beverages. You've eaten this before - it wasn't great.\" ",
 "type": "cog_type_text"
 }, {
-"speaker": "intro",
-"text": "intro",
+"speaker": "Reason",
+"text": "\"Get out of it before the smell gets through to your inner layers of clothing. Your jacket is long gone, but your shirt might still be saved. \"",
+"type": "cog_type_text"
+}, {
+"speaker": "Meche",
+"text": "\"Normally, we would throw garbage like this in garbage containers - why would there be heaps of trash... here? Where is here?\"",
+"type": "cog_type_text"
+}, {
+"speaker": "",
+"text": "You are sitting armchair-style in a heap of what must be trash and food waste. Your neck is flung back and stiff; your back hurts as much as you would expect from lying like this. Your clothing is cold and parts of it wet. You can't feel your left arm and you have the driest mouth and eyes that you can ever remeber having. ",
+"type": "cog_type_text"
+}, {
+"speaker": "Reason",
+"text": "\"This sucks.\" ",
+"type": "cog_type_text"
+}, {
+"speaker": "",
+"text": "You move your paralysed arm around and quickly realize the problem. It's got no coat-arm part on it. ",
+"type": "cog_type_text"
+}, {
+"text": "",
+"type": "cog_type_tree"
+}, {
+"conditions": [  ],
+"goto_tree": false,
+"text": "What?",
+"type": "cog_type_branch"
+}, {
+"speaker": "",
+"text": "Yeh, your coat and undershirt has been torn off on your left arm. It's cold out here so the sensation in your arm is gone. You, however, can still move it so worry less than more. ",
+"type": "cog_type_text"
+}, {
+"type": "cog_type_tree_end"
+}, {
+"speaker": "Reason",
+"text": "Firstly, are you hurt. Check your vitals, organs, arm. Secondly, our stuff. Wallet, credentials... anything of value. 
+Thirdly, where are we. Surroundings and mapping. ",
+"type": "cog_type_text"
+}, {
+"text": "",
+"type": "cog_type_tree"
+}, {
+"conditions": [  ],
+"goto_tree": false,
+"text": "Check your vitals",
+"type": "cog_type_branch"
+}, {
+"speaker": "",
+"text": "You check your chest with your non-paralysed arm. No punctures or cuts deep enough to be problematic. Some bruises that are new and still painful. Your shoulder is painful to move around so you assume there is a bad bruise there somewhere. Nothing major though. ",
+"type": "cog_type_text"
+}, {
+"conditions": [  ],
+"goto_tree": false,
+"text": "Check for stuff",
+"type": "cog_type_branch"
+}, {
+"speaker": "",
+"text": "You check your pockets, Right side pocket: A thin washed-out card sized, hard paper. It's got some blue ink that intelligable. You also have about 6 bucks and some chewing gum: already chewed. 
+
+Left side pocket is difficult with your right arm but you find nothing of value. 
+
+Back pocket has your wallet; inside it is your cards, credentials and no money. ",
+"type": "cog_type_text"
+}, {
+"speaker": "Reason",
+"text": "You weren't robbed. You are poor. ",
+"type": "cog_type_text"
+}, {
+"conditions": [  ],
+"goto_tree": false,
+"text": "Where are we?...",
+"type": "cog_type_branch"
+}, {
+"speaker": "",
+"text": "Looking around, you seem to be on the corner of an alleyway and a street. On the other side of the road is a building block, probably apartments. You see or hear no people. It's probably late evening and a flourencent light of the restaurant's backdoor is the only light here... besides the roadlights inbetween you and the apartments. ",
+"type": "cog_type_text"
+}, {
+"type": "cog_type_tree_end"
+}, {
+"speaker": "",
+"text": "okey, we now know where we are but how did we get here... FIND OUT NEXT TIME ON - ADVENTURE BILLY",
 "type": "cog_type_text"
 } ]

@@ -1,4 +1,4 @@
-extends Node
+extends "res://Game Engine/scripts/CogSystem.gd"
 
 # Parts
 onready var Textbox = $TextDisplay/RichTextLabel
@@ -14,7 +14,6 @@ var wait_for_player_input = false # When in tree, wait for response
 
 var file
 
-var current_tree = []
 var current_line = 0
 
 var next_up = null # for going forward without moving forward
@@ -27,21 +26,16 @@ var machine = 4
 
 var current_answers = {}
 
+export(Resource) var fallback_file = load("res://Data/editor/paths/path_You are no Theo, Teddy. Not to me. .tres")
+
 func _ready():
 	$TextDisplay/btn_ClockActivator.connect("button_down", self, "activate_clock")
 	
 	$AnimationPlayer.play("startup")
 	Textbox.connect("meta_clicked", self, "answer_clicked")
 	$TextDisplay/Button.connect("button_down", self, "next")
-	if Data.intro_file != null:
-		file = Data.intro_file
-	
-	# For testing! Used when I want to skip to a part in the current path.
-	if Data.testing_current_line != null: 
-		current_line = Data.testing_current_line
 	
 	check_file()
-	print("FILE : ", file)
 	
 	wait_for_player_input = true
 	yield($AnimationPlayer, "animation_finished")
@@ -90,12 +84,28 @@ func _process(delta):
 	Textbox.visible_characters = visible_chars
 	pass
 
+func set_file(new_file: numb_path):
+	print("/n/n/n Penis /n/n/n")
+	startfile()
+	
+	if new_file == null:
+		print("NEWFILE WAZ NULL `````````````````````````` -------------")
+	else:
+		if new_file.has("story"):
+			for cog in new_file.story: 
+				addblock(cog)
+		else:
+			for cog in new_file:
+				addblock(cog)
+		file = gen_file
+	pass
+
 func check_file():
 	for x in 9:
 		read("\n\n") # This is for the text starting point. Makes it the bottom.
 	if file == null:
-		printerr("GameSystem Error: No File found, please insert file.")
-		read("No file found")
+		set_file(fallback_file)
+		check_file()
 	else:
 		read("Press SPACE to start")
 	pass
@@ -125,7 +135,6 @@ func next_line(next = null):
 	
 	if isBranchEnd(current_line):
 		onBranchEnd(current_line)
-	print("FIND VALUE FUCK YOU! : ", file.values()[current_line].get_data())
 	do_line(file.values()[current_line])
 	pass
 
@@ -149,7 +158,6 @@ func do_line(LINE):
 	match LINE.type:
 		Data.COG_TYPE_TEXT:
 			read(LINE.text, true, LINE.speaker)
-			print(LINE.text)
 		Data.COG_TYPE_BRANCH:
 			next_line()
 		Data.COG_TYPE_TREE:
@@ -247,16 +255,16 @@ func read(string: String, sterilize = true, speaker = ""): # Sterilize means con
 				Speaker.texture = null
 				continue
 			Data.stat.abyss:
-				Speaker.texture = load("res://images/skills_cc/V2/Horror.png")
+				Speaker.texture = load("res://Data/images/skills_cc/V2/Horror.png")
 				Speaker.self_modulate = Color.brown
 			Data.stat.reason:
-				Speaker.texture = load("res://images/skills_cc/V2/Horror.png")
+				Speaker.texture = load("res://Data/images/skills_cc/V2/Horror.png")
 				Speaker.self_modulate = Color.webgreen
 			Data.stat.wisdom:
-				Speaker.texture = load("res://images/skills_cc/V2/Machine.png")
+				Speaker.texture = load("res://Data/images/skills_cc/V2/starve.png")
 				Speaker.self_modulate = Color.aqua
 			Data.stat.meche:
-				Speaker.texture = load("res://images/skills_cc/V2/Machine.png")
+				Speaker.texture = load("res://Data/images/skills_cc/V2/Meche God of All Machines.png")
 				Speaker.self_modulate = Color.darkslategray
 	else:
 		Speaker.texture = null

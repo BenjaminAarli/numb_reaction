@@ -1,6 +1,6 @@
-extends "res://GameSystem/scripts/CogSystem.gd"
+extends "res://Game Engine/scripts/CogSystem.gd"
 
-var game_scn = preload("res://GameSystem/scn_game.tscn")
+export(PackedScene) var game_scn
 
 onready var btnFile := $Buttons/Panel2/btnFileMenu
 onready var gridcont := get_node("Editor/ScrollContainer/GridContainer")
@@ -98,7 +98,7 @@ func load_file():
 	var load_file = ResourceLoader.load(file_save_path + "/" +  file_save_name + ".tres")
 	pass
 
-func load_file_loader(file):
+func file_to_gridcont(file):
 	# LOADING FILE
 	var loadfile = File.new()
 	loadfile.open(file_save_path + "/" +  file_save_name, File.READ)
@@ -108,16 +108,16 @@ func load_file_loader(file):
 	loadfile.close()
 	# LOAD FILE END
 	
-	print(loadf)
-	
 	gridcont.generate_cogwheel_using_file(loadf)
 	update_list_data()
 	emit_signal("file_loaded")
 	pass
 
 func test_full_file():
-	Data.intro_file = unparsed_file
-	get_tree().change_scene("res://GameSystem/scn_game.tscn")
+	var gscn = game_scn.instance()
+	gscn.set_file(gen_file)
+	
+	get_tree().change_scene_to(gscn)
 	pass
 
 func btnFileMenuIDPressed(id):
@@ -163,7 +163,7 @@ func _on_loadFileDialogue_confirmed():
 	file_save_path = $Control/loadFileDialogue.current_dir
 	file_save_name = $Control/loadFileDialogue.current_file
 	
-	load_file_loader(file_save_path)
+	file_to_gridcont(file_save_path)
 	update_list_data()
 	pass
 
@@ -178,7 +178,6 @@ func _on_btnTestGameFile_pressed():
 	startfile()
 	for g in gridcont.get_children():
 		addblock(g.get_data())
-	Data.intro_file = unparsed_file
 	test_full_file()
 	pass
 
@@ -195,7 +194,6 @@ func _on_btnLoadFile_pressed():
 	update_list_data()
 	emit_signal("file_loaded")
 	pass
-
 
 # DATA UPDATE SIGNALS # 
 

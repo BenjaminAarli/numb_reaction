@@ -1,7 +1,7 @@
 [gd_resource type="Resource" load_steps=3 format=2]
 
 [ext_resource path="res://Data/scripts/resources/character.gd" type="Script" id=1]
-[ext_resource path="res://images/skills_cc/V2/Horror.png" type="Texture" id=2]
+[ext_resource path="res://Data/images/skills_cc/V2/Horror.png" type="Texture" id=2]
 
 [resource]
 script = ExtResource( 1 )

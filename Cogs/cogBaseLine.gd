@@ -17,5 +17,4 @@ func _on_text_text_changed(new_text):
 	pass
 
 func update_data(data):
-	print("BLANK UPDATE DATA: ", data)
 	pass

@@ -7,13 +7,13 @@ var current_check  = []
 var current_success = []
 var current_failure = []
 
-var unparsed_file = {}
+var gen_file = {}
 
 func startfile():
 	var data = {
 		"labels":{},
 	}
-	unparsed_file["data"] = data
+	gen_file["data"] = data
 	pass
 
 func addtext(text : String, speaker = ""):
@@ -44,11 +44,11 @@ func addtree(text : String):
 
 func addbranch(text: String,goto_tree = true, conditions = []):
 	var list_num = 0
-	var previous_list = unparsed_file[list_num - 1]
-	var tree = unparsed_file[current_tree[-1]] # Get tree from file
+	var previous_list = gen_file[list_num - 1]
+	var tree = gen_file[current_tree[-1]] # Get tree from file
 	# Branch Stuff
 	## Get previous branch if branch exists. Used as an END point for previous branch. if branch is empty, aka -1, then dont set the end.
-	var previous_branch = null if current_branch[-1] == -1 else unparsed_file[current_branch.back()] # get previous branch if not empty
+	var previous_branch = null if current_branch[-1] == -1 else gen_file[current_branch.back()] # get previous branch if not empty
 	## if a previous branch was found, set it's END as here. 
 	if previous_branch != null:
 		previous_list.isBranchEnd = true
@@ -80,15 +80,15 @@ func addbranch(text: String,goto_tree = true, conditions = []):
 func end_tree():
 	# position in list at time of creation.
 	var list_num = 0
-	var previous_list = unparsed_file[list_num - 1]
-	var previous_branch = null if current_branch[-1] == -1 else unparsed_file[current_branch.back()]
+	var previous_list = gen_file[list_num - 1]
+	var previous_branch = null if current_branch[-1] == -1 else gen_file[current_branch.back()]
 	
 	if previous_branch != null:
 		previous_list.isBranchEnd = true
 		previous_branch.end = list_num
 		pass
 	
-	var tree = unparsed_file[current_tree.back()]
+	var tree = gen_file[current_tree.back()]
 	tree.end = list_num
 	
 	# Add to file
@@ -114,7 +114,7 @@ func setlabel(text: String):
 	var list_num = 0
 	var data = cog_label.new()
 	data.text = text
-	unparsed_file["data"].labels[text] = list_num
+	gen_file["data"].labels[text] = list_num
 	return data
 
 func addgoto(text: String):
@@ -161,13 +161,13 @@ func end_check():
 	var data = cog_check_end.new()
 	
 	if current_check.size() == current_success.size(): # Set end of success if success exists
-		unparsed_file[current_success.back()].end = list_num
+		gen_file[current_success.back()].end = list_num
 		current_success.pop_back()
 	if current_check.size() == current_failure.size(): # Set end of failure if failure exists
-		unparsed_file[current_failure.back()].end = list_num 
+		gen_file[current_failure.back()].end = list_num 
 		current_failure.pop_back()
 	
-	unparsed_file[current_check.back()].end = list_num # Set end of check branch
+	gen_file[current_check.back()].end = list_num # Set end of check branch
 	current_check.pop_back()
 	return data
 

@@ -28,26 +28,20 @@ _global_script_classes=[ {
 "class": "numb_story",
 "language": "GDScript",
 "path": "res://Data/scripts/resources/story.gd"
-}, {
-"base": "RichTextEffect",
-"class": "speak",
-"language": "GDScript",
-"path": "res://SpeakerFont.gd"
 } ]
 _global_script_class_icons={
 "GitAPI": "",
 "numb_character": "",
 "numb_path": "",
-"numb_story": "",
-"speak": ""
+"numb_story": ""
 }
 
 [application]
 
 config/name="(DialogueGame) Numb Reaction"
 config/description="A game that hates what it is. A visual novel."
-run/main_scene="res://scn_intro.tscn"
-boot_splash/image="res://images/clipboard1.png"
+run/main_scene="res://scenes/scn_intro.tscn"
+boot_splash/image="res://Data/images/clipboard1.png"
 config/icon="res://icon.png"
 
 [autoload]

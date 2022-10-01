@@ -35,7 +35,6 @@ var signal_emittable_onRelease = false
 var signal_emittable_onGrab = false
 
 func update_data(data):
-	print("BLANK UPDATE DATA: ", data)
 	pass
 
 func get_data():
@@ -44,7 +43,6 @@ func get_data():
 	data["type"] = type
 	
 	for c in addons.get_children():
-		print(c.get_class())
 		match c.get_class():
 			"TextEdit":
 				data[str(c.name)] = c.text

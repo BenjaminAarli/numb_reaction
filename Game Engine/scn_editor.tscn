@@ -1,8 +1,9 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://Game Engine/scripts/EditorScript.gd" type="Script" id=1]
-[ext_resource path="res://fonts/CabinBold-DEDD.ttf" type="DynamicFontData" id=2]
-[ext_resource path="res://images/portraits/Bearded Glasses Man.png" type="Texture" id=3]
+[ext_resource path="res://Data/fonts/CabinBold-DEDD.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://Data/images/portraits/Bearded Glasses Man.png" type="Texture" id=3]
+[ext_resource path="res://Game Engine/scn_game.tscn" type="PackedScene" id=4]
 
 [sub_resource type="StyleBoxFlat" id=3]
 corner_radius_top_left = 4
@@ -68,7 +69,6 @@ func on_child_grab(child):
 	grab_pos = child.get_mid_pos()
 	daddy.selected_child = child
 	daddy.selected_position = child.get_index()
-	print(\"on_child_grab(\", child, \"): Index = \", str(child.get_index()))
 	pass
 
 # Keep in mind, y position will go up. 
@@ -132,8 +132,6 @@ func generate_block(data):
 			nc = change_pathblock.instance()
 			nc.set_data(data)
 		_: 
-			print(\"Genblock data: \", str(data.type))
-			print(\"genblock data is not a part of known types.\")
 			return 0
 	
 	nc.connect(\"onRelease\", self, \"on_child_release\")
@@ -337,7 +335,6 @@ func get_all_paths():
 	for f in files:
 		var pth = ResourceLoader.load(str(f))
 		paths[pth.display_name] = pth
-	print(\"get_all_paths(): \", str(paths))
 	return paths
 
 # File Editing, Getting and Setting.
@@ -453,7 +450,6 @@ func _on_savePath_pressed():
 	pass
 
 func _on_Paths_path_data_updated(data):
-	print(\"/    //////////  Paths Updated: \", data.keys()[0])
 	pass # Replace with function body.
 
 
@@ -516,7 +512,7 @@ onready var active_characters := get_node(\"active_characters_list\") as ItemLis
 
 onready var daddy = $\"../../..\"
 
-var noPortraitTexture = preload(\"res://images/portraits/unknown_man.png\")
+var noPortraitTexture = preload(\"res://Data/images/portraits/unknown_man.png\")
 
 var characters = {}
 
@@ -821,6 +817,7 @@ __meta__ = {
 
 UPDATE: I'm numb and didn't realize how extending worked. Not fixed but information gained"
 }
+game_scn = ExtResource( 4 )
 
 [node name="Panels" type="Control" parent="."]
 margin_right = 40.0

@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Cogs/cogBaseLine.gd" type="Script" id=1]
-[ext_resource path="res://fonts/Mechanical-g5Y5.otf" type="DynamicFontData" id=2]
+[ext_resource path="res://Data/fonts/Mechanical-g5Y5.otf" type="DynamicFontData" id=2]
 
 [sub_resource type="DynamicFont" id=2]
 outline_size = 1
