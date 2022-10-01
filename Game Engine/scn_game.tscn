@@ -1,6 +1,6 @@
 [gd_scene load_steps=26 format=2]
 
-[ext_resource path="res://GameSystem/scripts/GameSystem.gd" type="Script" id=1]
+[ext_resource path="res://Game Engine/scripts/GameSystem.gd" type="Script" id=1]
 [ext_resource path="res://images/dirty colors2.png" type="Texture" id=2]
 [ext_resource path="res://fonts/Mechanical-g5Y5.otf" type="DynamicFontData" id=3]
 [ext_resource path="res://shaders/wobble.gdshader" type="Shader" id=4]

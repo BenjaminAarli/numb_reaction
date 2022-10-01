@@ -1,6 +1,6 @@
 [gd_scene load_steps=14 format=2]
 
-[ext_resource path="res://GameSystem/scripts/EditorScript.gd" type="Script" id=1]
+[ext_resource path="res://Game Engine/scripts/EditorScript.gd" type="Script" id=1]
 [ext_resource path="res://fonts/CabinBold-DEDD.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://images/portraits/Bearded Glasses Man.png" type="Texture" id=3]
 

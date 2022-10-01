@@ -4,7 +4,7 @@
 [ext_resource path="res://images/textures/oilspill.jpg" type="Texture" id=2]
 [ext_resource path="res://shaders/wobble.gdshader" type="Shader" id=3]
 [ext_resource path="res://fonts/atwriter.ttf" type="DynamicFontData" id=4]
-[ext_resource path="res://GameSystem/scripts/GameSystem.gd" type="Script" id=5]
+[ext_resource path="res://Game Engine/scripts/GameSystem.gd" type="Script" id=5]
 [ext_resource path="res://fonts/GameText.tres" type="DynamicFont" id=6]
 [ext_resource path="res://images/dirty colors2.png" type="Texture" id=7]
 [ext_resource path="res://images/skills_cc/V2/Horror.png" type="Texture" id=8]
