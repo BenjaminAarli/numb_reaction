@@ -1,9 +1,8 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Game Engine/scripts/EditorScript.gd" type="Script" id=1]
 [ext_resource path="res://Data/fonts/CabinBold-DEDD.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://Data/images/portraits/Bearded Glasses Man.png" type="Texture" id=3]
-[ext_resource path="res://Game Engine/scn_game.tscn" type="PackedScene" id=4]
 
 [sub_resource type="StyleBoxFlat" id=3]
 corner_radius_top_left = 4
@@ -817,7 +816,6 @@ __meta__ = {
 
 UPDATE: I'm numb and didn't realize how extending worked. Not fixed but information gained"
 }
-game_scn = ExtResource( 4 )
 
 [node name="Panels" type="Control" parent="."]
 margin_right = 40.0

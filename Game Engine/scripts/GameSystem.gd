@@ -85,19 +85,14 @@ func _process(delta):
 	pass
 
 func set_file(new_file: numb_path):
-	print("/n/n/n Penis /n/n/n")
 	startfile()
 	
 	if new_file == null:
-		print("NEWFILE WAZ NULL `````````````````````````` -------------")
-	else:
-		if new_file.has("story"):
-			for cog in new_file.story: 
-				addblock(cog)
-		else:
-			for cog in new_file:
-				addblock(cog)
-		file = gen_file
+		print_debug("NEWFILE WAZ NULL `````````````````````````` -------------")
+		return 0
+	for cog in new_file.story: 
+		addblock(cog)
+	file = gen_file
 	pass
 
 func check_file():

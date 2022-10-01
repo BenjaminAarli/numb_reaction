@@ -1,6 +1,6 @@
 extends "res://Game Engine/scripts/CogSystem.gd"
 
-export(PackedScene) var game_scn
+var game_scn = "res://Game Engine/scn_game.tscn"
 
 onready var btnFile := $Buttons/Panel2/btnFileMenu
 onready var gridcont := get_node("Editor/ScrollContainer/GridContainer")
@@ -114,10 +114,20 @@ func file_to_gridcont(file):
 	pass
 
 func test_full_file():
-	var gscn = game_scn.instance()
-	gscn.set_file(gen_file)
+	var game_scn_load = load(game_scn)
+	var game_scn_instance = game_scn_load.instance()
 	
-	get_tree().change_scene_to(gscn)
+	print("Game Load: ", game_scn_load)
+	print("Game instance: ", game_scn_instance)
+	
+	game_scn_instance.file = gen_file
+	
+	get_parent().add_child(game_scn_instance)
+	queue_free()
+	
+#	var gscn = game_scn
+#	gscn.set_file(gen_file)
+#	get_tree().change_scene(game_scn)
 	pass
 
 func btnFileMenuIDPressed(id):
